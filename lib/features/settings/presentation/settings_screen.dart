@@ -121,6 +121,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             _footerImageUrl = url;
         }
       });
+      // Mise à jour réactive immédiate du provider (aperçu/PDF reflètent le changement).
+      final updated = _buildCompany();
+      ref.read(currentCompanyProvider.notifier).update(updated);
+      // Sauvegarde automatique en BD pour que le chemin ne soit pas perdu.
+      await _autoSave(updated);
     } on ApiException catch (e) {
       _toast(e.message);
     } catch (_) {
@@ -141,6 +146,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           _footerImageUrl = '';
       }
     });
+    // Mise à jour du provider + sauvegarde silencieuse après retrait.
+    final updated = _buildCompany();
+    ref.read(currentCompanyProvider.notifier).update(updated);
+    _autoSave(updated);
+  }
+
+  /// Sauvegarde silencieuse (sans vérification de nom, sans toast) utilisée
+  /// après chaque upload ou retrait d'image. Erreurs swallowées : l'URL est
+  /// déjà dans le state local et sera renvoyée à la prochaine sauvegarde manuelle.
+  Future<void> _autoSave(Company company) async {
+    try {
+      await ref.read(apiClientProvider).put('/api/company', body: company.toJson());
+    } on ApiException catch (e) {
+      if (e.statusCode == 404 && company.name.trim().isNotEmpty) {
+        // Pas encore d'entreprise en BD → on la crée.
+        try {
+          await ref.read(apiClientProvider).post('/api/company', body: company.toJson());
+        } catch (_) { /* silencieux */ }
+      }
+      // Autres erreurs : silencieux.
+    } catch (_) { /* silencieux */ }
   }
 
   Future<void> _save() async {
