@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DATO — Créez des devis pros en 3 minutes</title>
+<link rel="stylesheet" href="styles/tokens.css">
+<link rel="stylesheet" href="devis/landing.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-whatsapp" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163a11.867 11.867 0 0 1-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.82 11.82 0 0 1 8.413 3.488 11.82 11.82 0 0 1 3.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 0 1-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 0 0 1.515 5.26l-.999 3.648 3.973-1.292zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></symbol>
+  <symbol id="i-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h7l-1 8 10-12h-7l1-8z"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></symbol>
+  <symbol id="i-type" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></symbol>
+  <symbol id="i-wifi-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2l20 20M8.5 16.5a5 5 0 0 1 7 0M5 12.5a10 10 0 0 1 5.5-2.7M19 12.5a10 10 0 0 0-3.2-2.1M12 20h.01"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+  <symbol id="i-chevron-d" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h18M3 6h18M3 18h18"/></symbol>
+</svg>
+
+<div class="lp">
+
+  <!-- NAV -->
+  <nav class="lp-nav">
+    <div class="wrap row">
+      <div class="brand"><span class="b">D</span> DATO</div>
+      <div class="links">
+        <a onclick="document.getElementById('benefices').scrollIntoView({behavior:'smooth'})">Fonctionnalités</a>
+        <a onclick="document.getElementById('comment').scrollIntoView({behavior:'smooth'})">Comment ça marche</a>
+        <a onclick="document.getElementById('tarifs').scrollIntoView({behavior:'smooth'})">Tarifs</a>
+        <a onclick="document.getElementById('faq').scrollIntoView({behavior:'smooth'})">FAQ</a>
+      </div>
+      <div class="actions">
+        <a class="lpbtn lpbtn-ghost" href="Auth & Onboarding.html">Se connecter</a>
+        <a class="lpbtn lpbtn-primary" href="Auth & Onboarding.html">Créer un compte gratuit</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="wrap grid">
+      <div>
+        <span class="pill"><svg width="16" height="16"><use href="#i-zap"/></svg> Conçu pour les artisans d'Afrique</span>
+        <h1>Créez des devis <span class="hl">professionnels</span> en 3 minutes, partagez-les sur WhatsApp.</h1>
+        <p class="lead">DATO transforme votre téléphone en outil de devis. Calcul automatique, montant en lettres, PDF soigné — et l'envoi au client en un seul geste.</p>
+        <div class="cta-row">
+          <a class="lpbtn lpbtn-amber lpbtn-lg" href="Auth & Onboarding.html"><svg width="18" height="18"><use href="#i-zap"/></svg> Commencer gratuitement</a>
+          <a class="lpbtn lpbtn-white lpbtn-lg" onclick="document.getElementById('comment').scrollIntoView({behavior:'smooth'})">Voir comment ça marche</a>
+        </div>
+        <div class="trust">
+          <span class="it"><svg width="16" height="16" class="c"><use href="#i-check"/></svg> 3 devis gratuits / mois</span>
+          <span class="it"><svg width="16" height="16" class="c"><use href="#i-check"/></svg> Sans carte bancaire</span>
+          <span class="it"><svg width="16" height="16" class="c"><use href="#i-check"/></svg> Paiement Mobile Money</span>
+        </div>
+      </div>
+      <div class="mockup">
+        <div class="badge-float bf1"><svg width="18" height="18" class="i"><use href="#i-check"/></svg> Montant en lettres auto</div>
+        <div class="ph">
+          <div class="scr">
+            <div class="sbar"><span>9:30</span><span>▴ ▰▰</span></div>
+            <div class="mk-head">
+              <div class="obj">Fabrication de 40 chaises</div>
+              <div class="amt">1 025 500 FCFA</div>
+            </div>
+            <div class="mk-body">
+              <div class="mk-line"><span>Total Matériel</span><span class="v">775 500</span></div>
+              <div class="mk-line"><span>Usinage 1500×40</span><span class="v">60 000</span></div>
+              <div class="mk-line"><span>Transport</span><span class="v">50 000</span></div>
+              <div class="mk-line"><span>Main d'œuvre 3000×40</span><span class="v">120 000</span></div>
+              <div class="mk-wa"><svg width="15" height="15"><use href="#i-whatsapp"/></svg> Partager sur WhatsApp</div>
+            </div>
+          </div>
+        </div>
+        <div class="badge-float bf2"><svg width="18" height="18" class="i"><use href="#i-file"/></svg> PDF prêt en 1 tap</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- STRIP -->
+  <div class="strip">
+    <div class="wrap row">
+      <span class="lbl">Ils gagnent du temps avec DATO</span>
+      <div class="stat"><span class="n">3 min</span><span class="t">pour un devis</span></div>
+      <div class="stat"><span class="n">+2 400</span><span class="t">artisans</span></div>
+      <div class="stat"><span class="n">12 000+</span><span class="t">devis envoyés</span></div>
+    </div>
+  </div>
+
+  <!-- BENEFITS -->
+  <section class="sec" id="benefices">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="kick">Pourquoi DATO</div>
+        <h2>Tout ce qu'il faut pour un devis qui inspire confiance</h2>
+        <p>Pas de jargon, pas de tableur compliqué. Juste un outil pensé pour le terrain.</p>
+      </div>
+      <div class="benefits-grid">
+        <div class="bcard"><div class="ic b1"><svg width="24" height="24"><use href="#i-zap"/></svg></div><h3>Rapide sur le chantier</h3><p>Ajoutez vos lignes au doigt, le clavier numérique s'ouvre pour les quantités, le total se calcule en direct.</p></div>
+        <div class="bcard"><div class="ic b2"><svg width="24" height="24"><use href="#i-whatsapp"/></svg></div><h3>Partage WhatsApp</h3><p>Envoyez un lien propre à votre client en un geste. Il consulte le devis et télécharge le PDF, sans rien installer.</p></div>
+        <div class="bcard"><div class="ic b3"><svg width="24" height="24"><use href="#i-type"/></svg></div><h3>Montant en lettres auto</h3><p>« Arrêté le présent devis à la somme de… » est généré tout seul. Fini les erreurs et les calculs à la main.</p></div>
+        <div class="bcard"><div class="ic b1"><svg width="24" height="24"><use href="#i-file"/></svg></div><h3>PDF professionnel</h3><p>En-tête, tableau, sous-totaux, signatures : un document soigné, crédible même imprimé en noir et blanc.</p></div>
+        <div class="bcard"><div class="ic b2"><svg width="24" height="24"><use href="#i-shield"/></svg></div><h3>Rubriques sur mesure</h3><p>Usinage, transport, main d'œuvre… ajoutez vos propres rubriques au forfait ou en formule. Chaque métier est différent.</p></div>
+        <div class="bcard"><div class="ic b3"><svg width="24" height="24"><use href="#i-wifi-off"/></svg></div><h3>Marche hors ligne</h3><p>Connexion faible ? Vos devis sont sauvegardés sur le téléphone et synchronisés dès le retour du réseau.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEPS -->
+  <section class="sec alt" id="comment">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="kick">Comment ça marche</div>
+        <h2>De la saisie au client en 3 étapes</h2>
+      </div>
+      <div class="steps-grid">
+        <div class="step"><div class="n">1</div><h3>Saisissez le devis</h3><p>Objet, client, lignes de matériel et rubriques. Réutilisez vos articles fréquents grâce à la bibliothèque.</p></div>
+        <div class="step"><div class="n">2</div><h3>Vérifiez l'aperçu</h3><p>Le document final s'affiche comme il sera reçu : totaux, montant en lettres, signatures. Tout est prêt.</p></div>
+        <div class="step"><div class="n">3</div><h3>Partagez & encaissez</h3><p>Un tap pour envoyer sur WhatsApp ou générer le PDF. Suivez les statuts : envoyé, accepté, refusé.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="sec">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="kick">Témoignages</div>
+        <h2>Des artisans qui ont arrêté le papier</h2>
+      </div>
+      <div class="testi-grid">
+        <div class="testi"><div class="stars">★★★★★</div><p>« Avant je faisais mes devis à la main dans un cahier. Maintenant en 5 minutes c'est envoyé sur WhatsApp. Mes clients me prennent plus au sérieux. »</p><div class="who"><div class="av">EB</div><div><div class="nm">Émile Biya</div><div class="role">Menuisier · Yaoundé</div></div></div></div>
+        <div class="testi"><div class="stars">★★★★★</div><p>« Le montant en lettres tout seul, ça m'a sauvé. Je me trompais souvent. Et le PDF est plus propre que ce que je faisais sur ordinateur. »</p><div class="who"><div class="av">AF</div><div><div class="nm">Aïcha Fouda</div><div class="role">Décoratrice · Douala</div></div></div></div>
+        <div class="testi"><div class="stars">★★★★★</div><p>« Je paie avec MTN Mobile Money, pas besoin de carte bancaire. Pour un électricien sur le terrain comme moi, c'est exactement ce qu'il fallait. »</p><div class="who"><div class="av">RT</div><div><div class="nm">Roger Tchana</div><div class="role">Électricien · Bafoussam</div></div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="sec alt" id="tarifs">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="kick">Tarifs</div>
+        <h2>Simple et transparent</h2>
+        <p>Commencez gratuitement. Passez à Pro quand vous êtes prêt — payable en Mobile Money.</p>
+      </div>
+      <div class="pricing-toggle">
+        <div class="seg">
+          <button id="t-monthly" class="on" onclick="setBilling('monthly')">Mensuel</button>
+          <button id="t-yearly" onclick="setBilling('yearly')">Annuel <span class="save">−20%</span></button>
+        </div>
+      </div>
+      <div class="price-grid">
+        <div class="pcard">
+          <div class="pn">Gratuit</div>
+          <div class="pdesc">Pour démarrer et tester</div>
+          <div class="pr"><span class="a">0</span><span class="u">FCFA</span></div>
+          <div class="psub">Pour toujours</div>
+          <ul class="feats">
+            <li><svg width="18" height="18" class="c"><use href="#i-check"/></svg> 3 devis par mois</li>
+            <li><svg width="18" height="18" class="c"><use href="#i-check"/></svg> Partage WhatsApp & PDF</li>
+            <li><svg width="18" height="18" class="c"><use href="#i-check"/></svg> Montant en lettres auto</li>
+            <li class="off"><svg width="18" height="18" class="c"><use href="#i-x"/></svg> Filigrane DATO sur les PDF</li>
+            <li class="off"><svg width="18" height="18" class="c"><use href="#i-x"/></svg> Bibliothèque limitée</li>
+          </ul>
+          <a class="lpbtn lpbtn-white" style="border:1.5px solid var(--border-strong)" href="Auth & Onboarding.html">Commencer gratuitement</a>
+        </div>
+        <div class="pcard featured">
+          <div class="rib">RECOMMANDÉ</div>
+          <div class="pn">DATO Pro</div>
+          <div class="pdesc">Pour les artisans actifs</div>
+          <div class="pr"><span class="a" id="price-amt">2 500</span><span class="u">FCFA <span id="price-per">/ mois</span></span></div>
+          <div class="psub" id="price-sub">Facturé chaque mois</div>
+          <ul class="feats">
+            <li><svg width="18" height="18" class="c"><use href="#i-check"/></svg> <b>Devis illimités</b></li>
+            <li><svg width="18" height="18" class="c"><use href="#i-check"/></svg> Aucun filigrane</li>
+            <li><svg width="18" height="18" class="c"><use href="#i-check"/></svg> Bibliothèque d'articles illimitée</li>
+            <li><svg width="18" height="18" class="c"><use href="#i-check"/></svg> Modèles par métier</li>
+            <li><svg width="18" height="18" class="c"><use href="#i-check"/></svg> Support prioritaire WhatsApp</li>
+          </ul>
+          <a class="lpbtn lpbtn-primary" href="Auth & Onboarding.html"><svg width="18" height="18"><use href="#i-zap"/></svg> Passer à Pro</a>
+        </div>
+      </div>
+      <div class="pay-note">
+        Paiement 100 % Mobile Money :
+        <span class="op"><span class="d mtn">MTN</span> MTN MoMo</span>
+        <span class="op"><span class="d orange">OM</span> Orange Money</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="sec" id="faq">
+    <div class="wrap">
+      <div class="sec-head"><div class="kick">FAQ</div><h2>Questions fréquentes</h2></div>
+      <div class="faq">
+        <div class="faq-item" onclick="this.classList.toggle('open')"><div class="q">Ai-je besoin d'une carte bancaire ? <svg width="20" height="20" class="ch"><use href="#i-chevron-d"/></svg></div><div class="a">Non. DATO est gratuit pour 3 devis par mois, sans carte. L'abonnement Pro se paie en Mobile Money (MTN ou Orange), directement depuis votre téléphone.</div></div>
+        <div class="faq-item" onclick="this.classList.toggle('open')"><div class="q">Mon client doit-il installer l'application ? <svg width="20" height="20" class="ch"><use href="#i-chevron-d"/></svg></div><div class="a">Non. Vous lui envoyez un simple lien WhatsApp. Il ouvre le devis dans son navigateur et peut télécharger le PDF, sans aucune installation ni compte.</div></div>
+        <div class="faq-item" onclick="this.classList.toggle('open')"><div class="q">Est-ce que ça marche sans bonne connexion ? <svg width="20" height="20" class="ch"><use href="#i-chevron-d"/></svg></div><div class="a">Oui. Vos devis sont enregistrés sur votre téléphone et se synchronisent dès que la connexion revient. Un bandeau vous indique le mode hors ligne.</div></div>
+        <div class="faq-item" onclick="this.classList.toggle('open')"><div class="q">Puis-je personnaliser les rubriques (usinage, transport…) ? <svg width="20" height="20" class="ch"><use href="#i-chevron-d"/></svg></div><div class="a">Absolument. Chaque métier est différent : ajoutez autant de rubriques que vous voulez, au forfait (montant direct) ou en formule (ex. 1500 × 40). Vous pouvez aussi les réordonner.</div></div>
+        <div class="faq-item" onclick="this.classList.toggle('open')"><div class="q">Puis-je annuler à tout moment ? <svg width="20" height="20" class="ch"><use href="#i-chevron-d"/></svg></div><div class="a">Oui. L'abonnement Pro est sans engagement. Vous gardez l'accès jusqu'à la fin de la période payée, puis vous repassez automatiquement au forfait gratuit.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA BAND -->
+  <section class="sec">
+    <div class="wrap">
+      <div class="cta-band">
+        <h2>Votre prochain devis, prêt en 3 minutes.</h2>
+        <p>Rejoignez les artisans qui se démarquent avec des devis professionnels.</p>
+        <a class="lpbtn lpbtn-amber lpbtn-lg" href="Auth & Onboarding.html"><svg width="18" height="18"><use href="#i-zap"/></svg> Créer mon compte gratuit</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="lp-foot">
+    <div class="wrap">
+      <div class="grid">
+        <div>
+          <div class="brand"><span class="b">D</span> DATO</div>
+          <p>L'outil de devis pensé pour les artisans et techniciens d'Afrique francophone. Simple, fiable, mobile.</p>
+        </div>
+        <div><h4>Produit</h4><ul><li><a onclick="document.getElementById('benefices').scrollIntoView({behavior:'smooth'})">Fonctionnalités</a></li><li><a onclick="document.getElementById('tarifs').scrollIntoView({behavior:'smooth'})">Tarifs</a></li><li><a href="Application DATO.html">Démo</a></li></ul></div>
+        <div><h4>Ressources</h4><ul><li><a onclick="document.getElementById('faq').scrollIntoView({behavior:'smooth'})">FAQ</a></li><li><a href="Modals & États.html">Support</a></li></ul></div>
+        <div><h4>Légal</h4><ul><li><a>CGU</a></li><li><a>Confidentialité</a></li><li><a>Mentions légales</a></li></ul></div>
+      </div>
+      <div class="bottom"><span>© 2026 DATO. Tous droits réservés.</span><span>Fait pour les artisans 🇨🇲 🇨🇮 🇸🇳</span></div>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  function setBilling(mode) {
+    var m = document.getElementById('t-monthly'), y = document.getElementById('t-yearly');
+    var amt = document.getElementById('price-amt'), per = document.getElementById('price-per'), sub = document.getElementById('price-sub');
+    if (mode === 'yearly') {
+      y.classList.add('on'); m.classList.remove('on');
+      amt.textContent = '2 000'; per.textContent = '/ mois'; sub.textContent = '24 000 FCFA facturés une fois par an';
+    } else {
+      m.classList.add('on'); y.classList.remove('on');
+      amt.textContent = '2 500'; per.textContent = '/ mois'; sub.textContent = 'Facturé chaque mois';
+    }
+  }
+</script>
+</body>
+</html>

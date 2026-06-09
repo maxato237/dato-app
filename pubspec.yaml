@@ -1,0 +1,72 @@
+name: dato
+description: Devis professionnels pour artisans — Afrique francophone.
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+  flutter: ">=3.22.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # --- État & navigation ---
+  flutter_riverpod: ^2.5.1
+  riverpod_annotation: ^2.3.5
+  go_router: ^14.2.0
+
+  # --- UI / design system ---
+  # google_fonts retiré : polices bundlées localement (assets/fonts/) pour
+  # éviter le téléchargement réseau bloquant au démarrage + la chaîne native
+  # path_provider → jni → jni_flutter qu'il tirait.
+  flutter_svg: ^2.0.10+1
+  skeletonizer: ^1.4.2
+
+  # --- Données ---
+  intl: ^0.20.0
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
+
+  # --- PDF & partage (Phase 3) ---
+  pdf: ^3.11.0
+  printing: ^5.13.1
+  share_plus: ^9.0.0
+  url_launcher: ^6.3.0
+
+  # --- Réseau / backend / auth / médias ---
+  supabase_flutter: ^2.5.6
+  dio: ^5.5.0
+  flutter_secure_storage: ^10.3.1
+  image_picker: ^1.1.2
+  # À réactiver au fur et à mesure que les features sont implémentées :
+  # connectivity_plus: ^6.0.3
+  # image_cropper: ^12.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  # build_runner: ^2.4.11
+  # riverpod_generator: ^2.4.0
+  # freezed: ^2.5.7
+  # json_serializable: ^6.8.0
+  golden_toolkit: ^0.15.0
+  mocktail: ^1.0.4
+
+flutter:
+  uses-material-design: true
+  generate: true
+  assets:
+    - assets/icons/
+  fonts:
+    - family: Sora
+      fonts:
+        - asset: assets/fonts/Sora.ttf
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter.ttf

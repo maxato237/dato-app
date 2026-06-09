@@ -1,0 +1,95 @@
+/* ============================================================
+   DATO — Design tokens
+   SaaS de génération de devis pour artisans (Afrique francophone)
+   Mobile-first. Personnalité : professionnel · fiable · chaleureux.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  /* ---- Couleurs de marque ---- */
+  --ink: #1B4965;          /* primaire — bleu encre profond */
+  --ink-700: #163d56;
+  --ink-600: #205a7d;
+  --ink-100: #e7eef3;      /* fond bleuté léger */
+  --ink-050: #f1f6f9;
+
+  --green: #2BA84A;        /* succès / WhatsApp / argent */
+  --green-700: #218a3c;
+  --green-100: #e4f5e9;
+
+  --amber: #F4A300;        /* CTA secondaire / énergie */
+  --amber-700: #c98700;
+  --amber-100: #fdf1d8;
+
+  --whatsapp: #25D366;     /* vert WhatsApp officiel */
+
+  /* ---- Sémantiques ---- */
+  --success: #2BA84A;
+  --danger:  #E5484D;
+  --danger-100: #fde8e8;
+  --warning: #F4A300;
+  --info:    #1B4965;
+
+  /* ---- Neutres ---- */
+  --bg:        #F7F8FA;    /* fond appli */
+  --surface:   #FFFFFF;    /* cartes / surfaces */
+  --surface-2: #FBFCFD;
+  --border:    #E3E8EE;    /* bordures */
+  --border-strong: #d2dae3;
+  --text:      #101828;    /* texte principal */
+  --text-2:    #475467;    /* texte secondaire */
+  --text-3:    #98a2b3;    /* texte tertiaire / placeholder */
+
+  /* ---- Statuts de devis ---- */
+  --st-draft-bg:    #eef0f3;  --st-draft-fg:    #5b6573;
+  --st-sent-bg:     #e7eef3;  --st-sent-fg:     #1B4965;
+  --st-accepted-bg: #e4f5e9;  --st-accepted-fg: #218a3c;
+  --st-refused-bg:  #fde8e8;  --st-refused-fg:  #c0383c;
+
+  /* ---- Typographie ---- */
+  --font-head: 'Sora', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  --fs-display: 28px;  --lh-display: 34px;
+  --fs-h1: 24px;       --lh-h1: 30px;
+  --fs-h2: 20px;       --lh-h2: 26px;
+  --fs-h3: 17px;       --lh-h3: 24px;
+  --fs-body-lg: 16px;  --lh-body-lg: 24px;
+  --fs-body: 15px;     --lh-body: 22px;
+  --fs-sm: 13px;       --lh-sm: 18px;
+  --fs-xs: 12px;       --lh-xs: 16px;
+
+  /* ---- Espacements (échelle 4px) ---- */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 20px; --sp-6: 24px; --sp-8: 32px; --sp-10: 40px; --sp-12: 48px;
+
+  /* ---- Rayons ---- */
+  --r-sm: 8px;  --r-md: 10px; --r-lg: 12px; --r-xl: 16px; --r-pill: 999px;
+
+  /* ---- Ombres (douces, discrètes) ---- */
+  --sh-1: 0 1px 2px rgba(16,24,40,.05);
+  --sh-2: 0 1px 3px rgba(16,24,40,.08), 0 1px 2px rgba(16,24,40,.04);
+  --sh-3: 0 4px 12px rgba(16,24,40,.08), 0 2px 4px rgba(16,24,40,.04);
+  --sh-4: 0 12px 32px rgba(16,24,40,.14), 0 4px 8px rgba(16,24,40,.06);
+  --sh-up: 0 -4px 16px rgba(16,24,40,.06);
+
+  /* ---- Cibles tactiles ---- */
+  --tap: 48px;
+}
+
+/* Chiffres tabulaires pour tous les montants */
+.tnum { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,h2,h3,h4 { font-family: var(--font-head); margin: 0; }

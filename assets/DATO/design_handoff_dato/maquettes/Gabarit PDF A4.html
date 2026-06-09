@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DATO — Devis DV-2026-014 (PDF A4)</title>
+<link rel="stylesheet" href="styles/tokens.css">
+<style>
+  body { margin: 0; background: #5b6573; font-family: var(--font-body); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  /* Barre d'action (écran seulement) */
+  .toolbar { position: sticky; top: 0; z-index: 10; background: #1B4965; color: #fff; display: flex; align-items: center; gap: 14px; padding: 12px 22px; box-shadow: 0 2px 10px rgba(0,0,0,.25); }
+  .toolbar .t { font-family: var(--font-head); font-weight: 700; font-size: 15px; flex: 1; display: flex; align-items: center; gap: 10px; }
+  .toolbar .t .b { width: 30px; height: 30px; border-radius: 8px; background: rgba(255,255,255,.16); display: grid; place-items: center; font-weight: 800; }
+  .toolbar button { font-family: var(--font-head); font-weight: 600; font-size: 14px; border: 0; border-radius: 9px; padding: 10px 18px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+  .toolbar .print { background: var(--amber); color: #3a2a00; }
+  .toolbar .ghost { background: rgba(255,255,255,.14); color: #fff; }
+
+  .stage { padding: 30px 16px 60px; display: flex; flex-direction: column; align-items: center; gap: 24px; }
+
+  /* Page A4 : 210 × 297 mm */
+  .a4 { width: 210mm; min-height: 297mm; background: #fff; box-shadow: 0 10px 40px rgba(0,0,0,.3); padding: 16mm 16mm 14mm; position: relative; display: flex; flex-direction: column; color: #101828; }
+
+  /* En-tête répété */
+  .pdf-header { display: flex; align-items: center; gap: 14px; border: 2px solid #1B4965; border-radius: 4px; padding: 10px 14px; }
+  .pdf-header .logo { width: 56px; height: 56px; border-radius: 6px; background: #1B4965; color: #fff; display: grid; place-items: center; font-family: var(--font-head); font-weight: 800; font-size: 26px; flex: none; }
+  .pdf-header .ctr { flex: 1; text-align: center; }
+  .pdf-header .nm { font-family: var(--font-head); font-weight: 800; font-size: 23px; color: #1B4965; letter-spacing: .6px; line-height: 1.05; }
+  .pdf-header .act { font-family: var(--font-head); font-weight: 600; font-size: 13px; margin-top: 2px; }
+  .pdf-header .meta { font-size: 11px; color: #475467; margin-top: 3px; }
+
+  .date-line { text-align: right; font-size: 12.5px; margin: 14px 0 0; }
+  .date-line u { text-underline-offset: 2px; }
+
+  .objet { text-align: center; font-family: var(--font-head); font-weight: 700; font-size: 14px; text-transform: uppercase; text-decoration: underline; text-underline-offset: 3px; margin: 14px auto 14px; max-width: 90%; line-height: 1.4; }
+
+  .doit { font-weight: 700; font-size: 13px; margin-bottom: 12px; }
+  .doit u { text-underline-offset: 2px; }
+
+  /* Tableau */
+  table.devis { width: 100%; border-collapse: collapse; border: 1px solid #34495a; table-layout: fixed; }
+  table.devis th { background: #1B4965; color: #fff; font-family: var(--font-head); font-weight: 600; font-size: 11.5px; text-transform: uppercase; letter-spacing: .3px; padding: 8px 10px; border: 1px solid #34495a; text-align: center; }
+  table.devis td { padding: 6.5px 10px; border: 1px solid #c9d2dc; font-size: 12.5px; vertical-align: middle; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td.ctr { text-align: center; font-variant-numeric: tabular-nums; }
+  .sub td { background: #eef3ee; font-weight: 700; }
+  .rub td { background: #eef3ee; font-weight: 700; text-transform: uppercase; letter-spacing: .2px; }
+  .grand td { background: #1B4965; color: #fff; font-family: var(--font-head); font-weight: 800; font-size: 14px; }
+  .grand td.num { font-size: 15px; }
+
+  .lettres { font-style: italic; font-size: 12.5px; margin-top: 14px; line-height: 1.5; }
+  .nb { font-size: 11.5px; color: #475467; margin-top: 10px; }
+  .nb b { color: #101828; }
+
+  .signatures { display: flex; justify-content: space-around; gap: 20px; margin-top: 30px; }
+  .signatures .s { text-align: center; flex: 1; }
+  .signatures .s .lab { font-weight: 600; font-size: 12.5px; margin-bottom: 42px; }
+  .signatures .s .line { border-top: 1px dotted #98a2b3; padding-top: 4px; font-size: 10px; color: #98a2b3; }
+
+  .pdf-footer { margin-top: auto; padding-top: 12px; border-top: 1px solid #e3e8ee; display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #98a2b3; }
+  .pdf-footer span { white-space: nowrap; }
+  .pdf-footer .brandlet { font-family: var(--font-head); font-weight: 700; color: #1B4965; }
+
+  @media print {
+    body { background: #fff; }
+    .toolbar { display: none; }
+    .stage { padding: 0; gap: 0; }
+    .a4 { box-shadow: none; width: auto; min-height: auto; margin: 0; padding: 14mm; }
+    @page { size: A4; margin: 0; }
+  }
+</style>
+</head>
+<body>
+  <div class="toolbar">
+    <div class="t"><span class="b">D</span> Devis DV-2026-014 · Gabarit PDF A4</div>
+    <button class="ghost" onclick="location.href='Application DATO.html'">Retour</button>
+    <button class="print" onclick="window.print()">⤓ Imprimer / Enregistrer en PDF</button>
+  </div>
+
+  <div class="stage">
+    <div class="a4">
+      <!-- En-tête -->
+      <div class="pdf-header">
+        <div class="logo">M</div>
+        <div class="ctr">
+          <div class="nm">MILLENAIRE DECOR</div>
+          <div class="act">MENUISERIE GÉNÉRALE</div>
+          <div class="meta">BP : 705 YDE — Tél : 674 70 20 37 / 695 42 93 71</div>
+        </div>
+      </div>
+
+      <div class="date-line">Yaoundé, le <u>12 mai 2026</u></div>
+
+      <div class="objet">Devis estimatif quantitatif pour la fabrication de 40 chaises pour la salle de réunion des enseignants</div>
+
+      <div class="doit"><u>DOIT</u> : Lycée Bilingue de Yaoundé</div>
+
+      <table class="devis">
+        <thead>
+          <tr>
+            <th style="width:46%">Désignation</th>
+            <th style="width:12%">Qté</th>
+            <th style="width:20%">P.U</th>
+            <th style="width:22%">P.T</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Planches</td><td class="ctr">60</td><td class="num">6 000</td><td class="num">360 000</td></tr>
+          <tr><td>Litres de colle</td><td class="ctr">10</td><td class="num">3 000</td><td class="num">30 000</td></tr>
+          <tr><td>Bandes à poncer</td><td class="ctr">2</td><td class="num">24 000</td><td class="num">48 000</td></tr>
+          <tr><td>Litres de fond-dur</td><td class="ctr">30</td><td class="num">5 000</td><td class="num">150 000</td></tr>
+          <tr><td>Litres de diluant</td><td class="ctr">60</td><td class="num">1 500</td><td class="num">90 000</td></tr>
+          <tr><td>Teintes</td><td class="ctr">2</td><td class="num">12 000</td><td class="num">24 000</td></tr>
+          <tr><td>Paquets de vis</td><td class="ctr">10</td><td class="num">8 000</td><td class="num">80 000</td></tr>
+          <tr><td>Paquets de pointe</td><td class="ctr">3</td><td class="num">4 500</td><td class="num">13 500</td></tr>
+          <tr class="sub"><td colspan="3">TOTAL MATÉRIEL</td><td class="num">795 500</td></tr>
+
+          <tr class="rub"><td colspan="3">Usinage — 1 500 × 40</td><td class="num">60 000</td></tr>
+          <tr class="rub"><td colspan="3">Transport</td><td class="num">50 000</td></tr>
+          <tr class="rub"><td colspan="3">Main d'œuvre — 3 000 × 40</td><td class="num">120 000</td></tr>
+
+          <tr class="grand"><td colspan="3">TOTAL GÉNÉRAL</td><td class="num">1 025 500</td></tr>
+        </tbody>
+      </table>
+
+      <div class="lettres">Arrêté le présent devis à la somme de <b>Un million vingt-cinq mille cinq cents francs CFA</b>.</div>
+      <div class="nb"><b>NB :</b> Devis valable 30 jours. Acompte de 50 % à la commande, solde à la livraison.</div>
+
+      <div class="signatures">
+        <div class="s"><div class="lab">Le Technicien</div><div class="line">Signature</div></div>
+        <div class="s"><div class="lab">Le Client</div><div class="line">Signature</div></div>
+      </div>
+
+      <div class="pdf-footer">
+        <span>Devis généré avec <span class="brandlet">DATO</span></span>
+        <span>DV-2026-014</span>
+        <span>Page 1 / 1</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

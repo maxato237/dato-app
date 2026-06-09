@@ -1,0 +1,79 @@
+{
+  "@@locale": "fr",
+
+  "appName": "DATO",
+  "@appName": { "description": "Nom de l'application" },
+
+  "navHome": "Accueil",
+  "@navHome": { "description": "Onglet Accueil" },
+
+  "navQuotes": "Devis",
+  "@navQuotes": { "description": "Onglet Devis" },
+
+  "navNew": "Nouveau",
+  "@navNew": { "description": "Bouton nouveau devis" },
+
+  "navLibrary": "Articles",
+  "@navLibrary": { "description": "Onglet bibliothèque" },
+
+  "navSettings": "Réglages",
+  "@navSettings": { "description": "Onglet réglages" },
+
+  "statusDraft": "Brouillon",
+  "@statusDraft": { "description": "Statut brouillon" },
+
+  "statusSent": "Envoyé",
+  "@statusSent": { "description": "Statut envoyé" },
+
+  "statusAccepted": "Accepté",
+  "@statusAccepted": { "description": "Statut accepté" },
+
+  "statusRefused": "Refusé",
+  "@statusRefused": { "description": "Statut refusé" },
+
+  "buttonSave": "Enregistrer",
+  "buttonCancel": "Annuler",
+  "buttonConfirm": "Confirmer",
+  "buttonDelete": "Supprimer",
+  "buttonShare": "Partager",
+  "buttonClose": "Fermer",
+  "buttonRetry": "Réessayer",
+  "buttonAdd": "Ajouter",
+  "buttonEdit": "Modifier",
+
+  "errorRequired": "Ce champ est obligatoire",
+  "errorClientRequired": "Le nom du client est obligatoire",
+  "errorInvalidPhone": "Numéro de téléphone invalide",
+  "errorNetworkUnavailable": "Pas de connexion internet",
+  "errorGeneric": "Une erreur est survenue",
+
+  "loadingText": "Chargement…",
+  "savingText": "Enregistrement…",
+  "savedText": "Enregistré",
+
+  "emptyQuotesTitle": "Aucun devis",
+  "emptyQuotesSubtitle": "Créez votre premier devis en appuyant sur +",
+
+  "emptyLibraryTitle": "Bibliothèque vide",
+  "emptyLibrarySubtitle": "Ajoutez des articles réutilisables",
+
+  "dashboardTitle": "Tableau de bord",
+  "quotesListTitle": "Mes devis",
+  "libraryTitle": "Articles",
+  "settingsTitle": "Réglages",
+  "newQuoteTitle": "Nouveau devis",
+  "editQuoteTitle": "Modifier le devis",
+
+  "quotaFree": "{used}/{total} devis ce mois",
+  "@quotaFree": {
+    "placeholders": {
+      "used": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+
+  "shareViaWhatsApp": "Partager via WhatsApp",
+  "copyLink": "Copier le lien",
+  "downloadPdf": "Télécharger le PDF",
+  "shareViaEmail": "Envoyer par e-mail"
+}
