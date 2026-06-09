@@ -46,11 +46,7 @@ class QuoteDocument extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (company.hasHeaderImage) ...[
-            _coverImage(),
-            SizedBox(height: 14 * _fs),
-          ],
-          _companyHeader(),
+          _companyHeader(), // L'image d'en-tête est le fond du cadre, pas un élément séparé
           SizedBox(height: 18 * _fs),
           // Ville, le <date>
           Align(
@@ -150,30 +146,52 @@ class QuoteDocument extends StatelessWidget {
   TextStyle _head(BuildContext context) =>
       Theme.of(context).textTheme.titleLarge!;
 
-  Widget _coverImage() {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(6),
-      child: Image.network(
-        company.headerImageUrl,
-        width: double.infinity,
-        fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-      ),
-    );
-  }
-
   Widget _footerBanner() {
-    if (company.hasFooterImage) {
+    final bool hasBg = company.hasFooterImage;
+    final bool hasText = company.hasLocation;
+
+    if (hasBg) {
+      // Image rognée à la taille exacte du cadre, texte par-dessus si renseigné.
       return ClipRRect(
         borderRadius: BorderRadius.circular(6),
-        child: Image.network(
-          company.footerImageUrl,
-          width: double.infinity,
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: Image.network(
+                company.footerImageUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(color: AppColors.ink),
+              ),
+            ),
+            if (hasText)
+              Positioned.fill(
+                child: Container(color: Colors.black.withValues(alpha: 0.45)),
+              ),
+            // Le contenu non-positionné détermine la hauteur du Stack.
+            Padding(
+              padding:
+                  EdgeInsets.symmetric(horizontal: 16, vertical: 14 * _fs),
+              child: hasText
+                  ? Center(
+                      child: Text(
+                        company.location,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 13 * _fs,
+                          fontWeight: FontWeight.w700,
+                          height: 1.3,
+                        ),
+                      ),
+                    )
+                  : SizedBox(width: double.infinity, height: 40 * _fs),
+            ),
+          ],
         ),
       );
     }
+
+    // Pas d'image : bandeau coloré avec le texte de localisation.
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -196,67 +214,115 @@ class QuoteDocument extends StatelessWidget {
   }
 
   Widget _companyHeader() {
-    return Builder(builder: (context) {
-      final head = _head(context);
-      return Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: AppColors.ink, width: 2),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        child: Row(
-          children: [
-            // Logo affiché uniquement s'il a été uploadé (sinon : texte seul).
-            if (company.hasLogo) ...[
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  company.logoUrl,
-                  width: 52,
-                  height: 52,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-                ),
+    final bool hasBg = company.hasHeaderImage;
+
+    // Couleurs adaptatives : blanc sur fond image, sombres sans fond.
+    final Color nameColor = hasBg ? Colors.white : AppColors.ink;
+    final Color subColor =
+        hasBg ? Colors.white.withValues(alpha: 0.90) : AppColors.text;
+    final Color mutedColor =
+        hasBg ? Colors.white.withValues(alpha: 0.75) : AppColors.textMuted;
+
+    // Contenu adaptatif (logo + nom/activité/coordonnées).
+    final Widget inner = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          if (company.hasLogo) ...[
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.network(
+                company.logoUrl,
+                width: 52,
+                height: 52,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
               ),
-              const SizedBox(width: 14),
-            ],
-            Expanded(
-              child: Column(
-                children: [
-                  Text(
-                    company.name,
-                    textAlign: TextAlign.center,
-                    style: head.copyWith(
-                      fontSize: 22 * _fs,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.ink,
-                      letterSpacing: 0.5,
-                      height: 1.1,
-                    ),
+            ),
+            const SizedBox(width: 14),
+          ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  company.name,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 22 * _fs,
+                    fontWeight: FontWeight.w800,
+                    color: nameColor,
+                    letterSpacing: 0.5,
+                    height: 1.1,
                   ),
+                ),
+                if (company.activity.trim().isNotEmpty) ...[
                   SizedBox(height: 2 * _fs),
                   Text(
                     company.activity,
                     textAlign: TextAlign.center,
-                    style: head.copyWith(
-                        fontSize: 13 * _fs,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.text),
-                  ),
-                  SizedBox(height: 3 * _fs),
-                  Text(
-                    '${company.address} — Tél : ${company.phones}',
-                    textAlign: TextAlign.center,
                     style: TextStyle(
-                        fontSize: 11 * _fs, color: AppColors.textMuted),
+                      fontSize: 13 * _fs,
+                      fontWeight: FontWeight.w600,
+                      color: subColor,
+                    ),
                   ),
                 ],
+                if (company.address.trim().isNotEmpty ||
+                    company.phones.trim().isNotEmpty) ...[
+                  SizedBox(height: 3 * _fs),
+                  Text(
+                    [
+                      if (company.address.trim().isNotEmpty)
+                        company.address.trim(),
+                      if (company.phones.trim().isNotEmpty)
+                        'Tél : ${company.phones.trim()}',
+                    ].join(' — '),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 11 * _fs, color: mutedColor),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (hasBg) {
+      // Image rognée à la taille exacte du cadre + voile sombre pour lisibilité.
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(6),
+        child: Stack(
+          children: [
+            // Fond : image réseau rognée (BoxFit.cover = jamais déformée).
+            Positioned.fill(
+              child: Image.network(
+                company.headerImageUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(color: AppColors.ink),
               ),
             ),
+            // Voile semi-transparent pour la lisibilité du texte.
+            Positioned.fill(
+              child: Container(color: Colors.black.withValues(alpha: 0.50)),
+            ),
+            // Contenu par-dessus — sa hauteur détermine celle du Stack.
+            inner,
           ],
         ),
       );
-    });
+    }
+
+    // Sans image de fond : bordure classique.
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.ink, width: 2),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: inner,
+    );
   }
 
   Widget _table(BuildContext context, double total) {
