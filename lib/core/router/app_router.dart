@@ -14,9 +14,12 @@ import 'package:dato/features/library/presentation/library_screen.dart';
 import 'package:dato/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:dato/features/quotes/presentation/quote_editor_screen.dart';
 import 'package:dato/features/quotes/presentation/quote_preview_screen.dart';
+import 'package:dato/features/legal/presentation/legal_screen.dart';
+import 'package:dato/features/quotes/presentation/quote_public_screen.dart';
 import 'package:dato/features/quotes/presentation/quotes_list_screen.dart';
 import 'package:dato/features/settings/presentation/settings_screen.dart';
 import 'package:dato/features/shell/app_shell.dart';
+import 'package:dato/features/splash/presentation/splash_screen.dart';
 import 'routes.dart';
 
 /// Chemins auth que le router redirige vers /home quand l'utilisateur
@@ -38,11 +41,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
   return GoRouter(
     refreshListenable: notifier,
-    initialLocation: Routes.home,
+    initialLocation: Routes.splash,
     redirect: (context, state) {
       final repo = ref.read(authRepositoryProvider);
       final status = repo.status;
       final path = state.uri.path;
+
+      // Splash de démarrage : laissé passer quel que soit l'état de session.
+      if (path == Routes.splash) return null;
+
+      // Vue publique : deep link accessible sans authentification.
+      if (path.startsWith('/p/')) return null;
 
       if (status == AuthStatus.unauthenticated) {
         // Laisser passer les écrans auth ; bloquer le reste.
@@ -58,6 +67,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
+      // ── Splash de démarrage ─────────────────────────────────────────────
+      GoRoute(
+        path: Routes.splash,
+        builder: (_, __) => const SplashScreen(),
+      ),
+
       // ── Shell (app principale avec bottom nav) ──────────────────────────
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
@@ -104,6 +119,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ],
       ),
 
+      // ── Vue publique (deep link, sans auth) ─────────────────────────────
+      GoRoute(
+        path: Routes.publicQuote,
+        builder: (_, state) =>
+            QuotePublicScreen(token: state.pathParameters['token']!),
+      ),
+
       // ── Auth ────────────────────────────────────────────────────────────
       GoRoute(
         path: Routes.onboardingLogin,
@@ -124,6 +146,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.onboardingReset,
         builder: (_, __) => const ResetScreen(),
+      ),
+
+      // ── Mentions légales ────────────────────────────────────────────────
+      GoRoute(
+        path: Routes.legal,
+        builder: (_, __) => const LegalScreen(),
       ),
 
       // ── Onboarding ──────────────────────────────────────────────────────

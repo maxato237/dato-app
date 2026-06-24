@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'package:dato/core/network/network_providers.dart';
 import 'package:dato/core/router/routes.dart';
@@ -20,9 +21,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   // Étape 1 — entreprise
   final _nameCtrl = TextEditingController();
   final _activityCtrl = TextEditingController();
+  final _addressCtrl = TextEditingController();
   final _cityCtrl = TextEditingController();
   final _phonesCtrl = TextEditingController();
   String _currency = 'FCFA';
+  String? _nameErr;
+  String _logoUrl = '';
+  bool _uploadingLogo = false;
   bool _savingStep1 = false;
   bool _savingStep2 = false;
 
@@ -35,12 +40,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final company = ref.read(currentCompanyProvider);
     _nameCtrl.text = company.name;
     _activityCtrl.text = company.activity;
+    _addressCtrl.text = company.address;
     _cityCtrl.text = company.city;
     _phonesCtrl.text = company.phones;
-    _currency = company.currency;
+    _currency = company.currency.isEmpty ? 'FCFA' : company.currency;
+    _logoUrl = company.logoUrl;
+    // Pas de valeurs par défaut : champs vides avec placeholder.
     _sigCtrls = [
-      TextEditingController(text: 'Le Technicien'),
-      TextEditingController(text: 'Le Client'),
+      TextEditingController(),
+      TextEditingController(),
     ];
   }
 
@@ -48,6 +56,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   void dispose() {
     _nameCtrl.dispose();
     _activityCtrl.dispose();
+    _addressCtrl.dispose();
     _cityCtrl.dispose();
     _phonesCtrl.dispose();
     for (final c in _sigCtrls) {
@@ -59,23 +68,33 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   /// Sauvegarde l'entreprise dans le provider local ET appelle le backend.
   Future<void> _saveStep1() async {
     if (_savingStep1) return;
-    setState(() => _savingStep1 = true);
+    // Le nom de l'entreprise est requis pour créer l'entreprise.
+    if (_nameCtrl.text.trim().isEmpty) {
+      setState(() => _nameErr = "Le nom de l'entreprise est obligatoire.");
+      return;
+    }
+    setState(() {
+      _savingStep1 = true;
+      _nameErr = null;
+    });
     try {
       final phones = _phonesCtrl.text
           .trim()
-          .split(',')
+          .split(RegExp(r'[/,]'))
           .map((p) => p.trim())
           .where((p) => p.isNotEmpty)
           .toList();
 
-      // Mise à jour du provider local (UI immédiate)
+      // Mise à jour du provider local (UI immédiate, persisté en Isar)
       ref.read(currentCompanyProvider.notifier).update(
             ref.read(currentCompanyProvider).copyWith(
                   name: _nameCtrl.text.trim(),
                   activity: _activityCtrl.text.trim(),
+                  address: _addressCtrl.text.trim(),
                   city: _cityCtrl.text.trim(),
                   phones: _phonesCtrl.text.trim(),
                   currency: _currency,
+                  logoUrl: _logoUrl,
                 ),
           );
 
@@ -83,9 +102,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       await ref.read(apiClientProvider).post('/api/company', body: {
         'name': _nameCtrl.text.trim(),
         'activity': _activityCtrl.text.trim(),
+        'address': _addressCtrl.text.trim(),
         'city': _cityCtrl.text.trim(),
         'phones': phones,
         'currency': _currency,
+        if (_logoUrl.isNotEmpty) 'logo_url': _logoUrl,
       });
 
       if (mounted) context.go(Routes.onboarding2);
@@ -94,6 +115,42 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       if (mounted) context.go(Routes.onboarding2);
     } finally {
       if (mounted) setState(() => _savingStep1 = false);
+    }
+  }
+
+  /// Upload du logo en step 1 (galerie → Supabase → provider local).
+  Future<void> _pickLogo() async {
+    if (_uploadingLogo) return;
+    final picker = ImagePicker();
+    final XFile? picked = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1200,
+      imageQuality: 85,
+    );
+    if (picked == null) return;
+
+    final previousUrl = _logoUrl;
+    setState(() => _uploadingLogo = true);
+    try {
+      final url = await ref.read(apiClientProvider).uploadImage(picked.path);
+      if (!mounted) return;
+      setState(() => _logoUrl = url);
+      ref.read(currentCompanyProvider.notifier).update(
+            ref.read(currentCompanyProvider).copyWith(logoUrl: url),
+          );
+      if (previousUrl.isNotEmpty && previousUrl != url) {
+        await ref.read(apiClientProvider).deleteImage(previousUrl);
+      }
+    } catch (_) {
+      // Hors-ligne : on conserve l'image localement, envoi au retour réseau.
+      if (mounted) {
+        ref.read(currentCompanyProvider.notifier).queuePendingLogo(
+              picked.path,
+              previousRemoteUrl: previousUrl,
+            );
+      }
+    } finally {
+      if (mounted) setState(() => _uploadingLogo = false);
     }
   }
 
@@ -129,17 +186,25 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       1 => _Step1(
           nameCtrl: _nameCtrl,
           activityCtrl: _activityCtrl,
+          addressCtrl: _addressCtrl,
           cityCtrl: _cityCtrl,
           phonesCtrl: _phonesCtrl,
           currency: _currency,
+          nameError: _nameErr,
+          onNameChanged: (_) {
+            if (_nameErr != null) setState(() => _nameErr = null);
+          },
           onCurrencyChanged: (v) => setState(() => _currency = v!),
           onNext: _savingStep1 ? null : _saveStep1,
           onSkip: () => context.go(Routes.home),
+          logoUrl: _logoUrl,
+          uploadingLogo: _uploadingLogo,
+          onPickLogo: _pickLogo,
         ),
       2 => _Step2(
           sigCtrls: _sigCtrls,
           onAdd: () => setState(() =>
-              _sigCtrls.add(TextEditingController(text: 'Signature'))),
+              _sigCtrls.add(TextEditingController())),
           onRemove: (i) => setState(() {
             _sigCtrls[i].dispose();
             _sigCtrls.removeAt(i);
@@ -286,22 +351,34 @@ class _ObFooter extends StatelessWidget {
 class _Step1 extends StatelessWidget {
   final TextEditingController nameCtrl;
   final TextEditingController activityCtrl;
+  final TextEditingController addressCtrl;
   final TextEditingController cityCtrl;
   final TextEditingController phonesCtrl;
   final String currency;
+  final String? nameError;
+  final ValueChanged<String>? onNameChanged;
   final ValueChanged<String?> onCurrencyChanged;
   final VoidCallback? onNext;
   final VoidCallback? onSkip;
+  final String logoUrl;
+  final bool uploadingLogo;
+  final VoidCallback onPickLogo;
 
   const _Step1({
     required this.nameCtrl,
     required this.activityCtrl,
+    required this.addressCtrl,
     required this.cityCtrl,
     required this.phonesCtrl,
     required this.currency,
+    this.nameError,
+    this.onNameChanged,
     required this.onCurrencyChanged,
     this.onNext,
     this.onSkip,
+    this.logoUrl = '',
+    this.uploadingLogo = false,
+    required this.onPickLogo,
   });
 
   @override
@@ -326,13 +403,20 @@ class _Step1 extends StatelessWidget {
               style: TextStyle(fontSize: 14, color: AppColors.textMuted, height: 1.5),
             ),
             const SizedBox(height: 22),
-            _LogoCircle(name: nameCtrl),
+            _LogoCircle(
+              name: nameCtrl,
+              logoUrl: logoUrl,
+              uploading: uploadingLogo,
+              onTap: onPickLogo,
+            ),
             const SizedBox(height: 22),
             DatoTextField(
               key: const Key('ob1_name'),
               controller: nameCtrl,
               label: 'Nom de l\'entreprise',
               hint: 'MILLENAIRE DECOR',
+              error: nameError,
+              onChanged: onNameChanged,
               textInputAction: TextInputAction.next,
             ),
             const SizedBox(height: 16),
@@ -341,6 +425,14 @@ class _Step1 extends StatelessWidget {
               controller: activityCtrl,
               label: 'Activité',
               hint: 'Menuiserie générale',
+              textInputAction: TextInputAction.next,
+            ),
+            const SizedBox(height: 16),
+            DatoTextField(
+              key: const Key('ob1_address'),
+              controller: addressCtrl,
+              label: 'Adresse',
+              hint: 'BP : 705 YDE',
               textInputAction: TextInputAction.next,
             ),
             const SizedBox(height: 16),
@@ -378,61 +470,119 @@ class _Step1 extends StatelessWidget {
 
 class _LogoCircle extends StatelessWidget {
   final TextEditingController name;
-  const _LogoCircle({required this.name});
+  final String logoUrl;
+  final bool uploading;
+  final VoidCallback? onTap;
+
+  const _LogoCircle({
+    required this.name,
+    this.logoUrl = '',
+    this.uploading = false,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: name,
-      builder: (_, __) {
-        final initial = name.text.trim().isEmpty
-            ? null
-            : name.text.trim()[0].toUpperCase();
-        return Column(
-          children: [
-            Container(
-              width: 92,
-              height: 92,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: initial != null
-                      ? AppColors.ink
-                      : AppColors.borderStrong,
-                  width: 2,
-                  strokeAlign: BorderSide.strokeAlignOutside,
-                  style: initial != null
-                      ? BorderStyle.solid
-                      : BorderStyle.solid,
-                ),
-                color: initial != null
-                    ? AppColors.ink
-                    : AppColors.surface,
+    return GestureDetector(
+      onTap: onTap,
+      child: ListenableBuilder(
+        listenable: name,
+        builder: (_, __) {
+          final initial = name.text.trim().isEmpty
+              ? null
+              : name.text.trim()[0].toUpperCase();
+          final hasLogo = logoUrl.isNotEmpty;
+
+          // Contenu du cercle : photo > spinner > initiale > icône +
+          Widget circleChild;
+          if (uploading) {
+            circleChild = const SizedBox(
+              width: 28,
+              height: 28,
+              child: CircularProgressIndicator(
+                  color: Colors.white, strokeWidth: 2.5),
+            );
+          } else if (hasLogo) {
+            circleChild = ClipOval(
+              child: Image.network(
+                logoUrl,
+                width: 92,
+                height: 92,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => initial != null
+                    ? Text(initial,
+                        style: const TextStyle(
+                            fontFamily: 'Sora',
+                            fontWeight: FontWeight.w800,
+                            fontSize: 34,
+                            color: Colors.white))
+                    : const Icon(Icons.add,
+                        size: 28, color: AppColors.textMuted),
               ),
-              alignment: Alignment.center,
-              child: initial != null
-                  ? Text(
-                      initial,
-                      style: const TextStyle(
-                          fontFamily: 'Sora',
-                          fontWeight: FontWeight.w800,
-                          fontSize: 34,
-                          color: Colors.white),
-                    )
-                  : const Icon(Icons.add,
-                      size: 28, color: AppColors.textMuted),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              initial != null ? 'Changer le logo' : 'Ajouter votre logo',
+            );
+          } else if (initial != null) {
+            circleChild = Text(
+              initial,
               style: const TextStyle(
-                  fontSize: 13,
-                  color: AppColors.ink,
-                  fontWeight: FontWeight.w600),
-            ),
-          ],
-        );
-      },
+                  fontFamily: 'Sora',
+                  fontWeight: FontWeight.w800,
+                  fontSize: 34,
+                  color: Colors.white),
+            );
+          } else {
+            circleChild =
+                const Icon(Icons.add, size: 28, color: AppColors.textMuted);
+          }
+
+          final bool active = hasLogo || initial != null;
+
+          return Column(
+            children: [
+              Stack(
+                alignment: Alignment.bottomRight,
+                children: [
+                  Container(
+                    width: 92,
+                    height: 92,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: active ? AppColors.ink : AppColors.borderStrong,
+                        width: 2,
+                        strokeAlign: BorderSide.strokeAlignOutside,
+                      ),
+                      color: hasLogo ? Colors.transparent : (active ? AppColors.ink : AppColors.surface),
+                    ),
+                    alignment: Alignment.center,
+                    child: circleChild,
+                  ),
+                  // Icône caméra en badge
+                  Container(
+                    width: 26,
+                    height: 26,
+                    decoration: BoxDecoration(
+                      color: AppColors.ink,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppColors.surface, width: 2),
+                    ),
+                    alignment: Alignment.center,
+                    child: const Icon(Icons.camera_alt,
+                        size: 13, color: Colors.white),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Text(
+                hasLogo ? 'Changer le logo' : 'Ajouter votre logo',
+                style: const TextStyle(
+                    fontSize: 13,
+                    color: AppColors.ink,
+                    fontWeight: FontWeight.w600),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 }
@@ -586,6 +736,8 @@ class _SigItem extends StatelessWidget {
               controller: controller,
               style: const TextStyle(fontSize: 15),
               decoration: const InputDecoration(
+                hintText: 'Ex. Le Client, Le Technicien…',
+                hintStyle: TextStyle(color: AppColors.textLight),
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,

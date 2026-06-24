@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:dato/core/theme/app_theme.dart';
 import 'package:dato/core/widgets/app_icons.dart';
+import 'package:dato/core/widgets/offline_banner.dart';
 import 'package:dato/core/router/routes.dart';
+import 'package:dato/data/sync/connectivity_service.dart';
 
 const _kBarHeight = 72.0;
 const _kFabSize = 56.0; // outer diameter (white ring is part of the element)
@@ -10,7 +13,7 @@ const _kFabBorder = 4.0; // white ring thickness
 // Bouton entièrement dans la barre, centré verticalement
 const _kFabTopOffset = (_kBarHeight - _kFabSize) / 2; // = 8px
 
-class AppShell extends StatelessWidget {
+class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
@@ -27,9 +30,23 @@ class AppShell extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final online = ref.watch(isOnlineProvider).value ?? true;
     return Scaffold(
-      body: navigationShell,
+      body: Column(
+        children: [
+          if (!online) const OfflineBanner(),
+          // Quand le bandeau est visible, il absorbe l'inset de barre de statut :
+          // on l'enlève des écrans pour éviter un double espacement en haut.
+          Expanded(
+            child: MediaQuery.removePadding(
+              context: context,
+              removeTop: !online,
+              child: navigationShell,
+            ),
+          ),
+        ],
+      ),
       bottomNavigationBar: _DatoBottomBar(
         currentIndex: navigationShell.currentIndex,
         onTap: (i) => _onTap(context, i),

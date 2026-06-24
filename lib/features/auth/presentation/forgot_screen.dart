@@ -19,6 +19,7 @@ class _ForgotScreenState extends ConsumerState<ForgotScreen> {
   final _idCtrl = TextEditingController();
   bool _loading = false;
   String? _error;
+  String? _idErr;
 
   @override
   void dispose() {
@@ -28,11 +29,15 @@ class _ForgotScreenState extends ConsumerState<ForgotScreen> {
 
   Future<void> _submit() async {
     final id = _idCtrl.text.trim();
-    if (id.isEmpty) return;
+    if (id.isEmpty) {
+      setState(() => _idErr = 'Le numéro est obligatoire.');
+      return;
+    }
 
     setState(() {
       _loading = true;
       _error = null;
+      _idErr = null;
     });
     try {
       await ref
@@ -61,7 +66,13 @@ class _ForgotScreenState extends ConsumerState<ForgotScreen> {
           _ErrorBox(message: _error!),
           const SizedBox(height: 16),
         ],
-        _PhoneOrEmailField(controller: _idCtrl),
+        _PhoneOrEmailField(
+          controller: _idCtrl,
+          error: _idErr,
+          onChanged: (_) {
+            if (_idErr != null) setState(() => _idErr = null);
+          },
+        ),
         const SizedBox(height: 20),
         FilledButton(
           key: const Key('forgot_submit'),
@@ -100,10 +111,15 @@ class _ForgotScreenState extends ConsumerState<ForgotScreen> {
 
 class _PhoneOrEmailField extends StatelessWidget {
   final TextEditingController controller;
-  const _PhoneOrEmailField({required this.controller});
+  final String? error;
+  final ValueChanged<String>? onChanged;
+  const _PhoneOrEmailField(
+      {required this.controller, this.error, this.onChanged});
 
   @override
   Widget build(BuildContext context) {
+    final hasError = error != null;
+    final borderColor = hasError ? AppColors.danger : AppColors.borderStrong;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -122,8 +138,7 @@ class _PhoneOrEmailField extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
                 color: AppColors.bg,
-                border: Border.all(
-                    color: AppColors.borderStrong, width: 1.5),
+                border: Border.all(color: borderColor, width: 1.5),
                 borderRadius: BorderRadius.circular(AppRadii.md),
               ),
               alignment: Alignment.center,
@@ -142,6 +157,7 @@ class _PhoneOrEmailField extends StatelessWidget {
                 controller: controller,
                 keyboardType: TextInputType.phone,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                onChanged: onChanged,
                 style:
                     const TextStyle(fontSize: 16, color: AppColors.text),
                 decoration: InputDecoration(
@@ -152,13 +168,13 @@ class _PhoneOrEmailField extends StatelessWidget {
                       horizontal: 14, vertical: 14),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadii.md),
-                    borderSide: const BorderSide(
-                        color: AppColors.borderStrong, width: 1.5),
+                    borderSide: BorderSide(color: borderColor, width: 1.5),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadii.md),
-                    borderSide: const BorderSide(
-                        color: AppColors.ink, width: 1.5),
+                    borderSide: BorderSide(
+                        color: hasError ? AppColors.danger : AppColors.ink,
+                        width: 1.5),
                   ),
                   filled: true,
                   fillColor: AppColors.surface,
@@ -167,6 +183,11 @@ class _PhoneOrEmailField extends StatelessWidget {
             ),
           ],
         ),
+        if (hasError) ...[
+          const SizedBox(height: 6),
+          Text(error!,
+              style: const TextStyle(fontSize: 12, color: AppColors.danger)),
+        ],
       ],
     );
   }

@@ -31,12 +31,28 @@ class Section {
   final String title;
   final List<SectionLine> lines;
 
-  const Section({required this.id, required this.title, required this.lines});
+  /// Affiche le titre de la section comme ligne d'en-tête dans le devis rendu.
+  final bool showTitle;
+
+  const Section({
+    required this.id,
+    required this.title,
+    required this.lines,
+    this.showTitle = true,
+  });
 
   double get total => lines.fold(0.0, (s, l) => s + l.pt);
 
-  Section copyWith({String? title, List<SectionLine>? lines}) =>
-      Section(id: id, title: title ?? this.title, lines: lines ?? this.lines);
+  /// Le titre doit-il apparaître comme en-tête dans le devis rendu ?
+  bool get hasVisibleTitle => showTitle && title.trim().isNotEmpty;
+
+  Section copyWith({String? title, List<SectionLine>? lines, bool? showTitle}) =>
+      Section(
+        id: id,
+        title: title ?? this.title,
+        lines: lines ?? this.lines,
+        showTitle: showTitle ?? this.showTitle,
+      );
 }
 
 class RubriqueLine {

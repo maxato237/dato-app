@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:dato/core/router/routes.dart';
 import 'package:dato/core/theme/app_theme.dart';
 import 'package:dato/core/widgets/empty_state.dart';
+import 'package:dato/core/widgets/skeleton_list.dart';
 import 'package:dato/features/quotes/domain/quote.dart';
 import 'package:dato/features/quotes/providers/quotes_list_controller.dart';
 import 'package:dato/features/quotes/widgets/quote_actions_sheet.dart';
@@ -24,7 +25,8 @@ class QuotesListScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final quotes = ref.watch(quotesStreamProvider).valueOrNull ?? const <Quote>[];
+    final quotesAsync = ref.watch(quotesStreamProvider);
+    final quotes = quotesAsync.valueOrNull ?? const <Quote>[];
     final filter = ref.watch(quotesFilterProvider);
     final company = ref.watch(currentCompanyProvider);
     final filtered = filterQuotes(quotes, filter);
@@ -65,7 +67,12 @@ class QuotesListScreen extends ConsumerWidget {
             ),
           ),
           Expanded(
-            child: filtered.isEmpty
+            child: quotesAsync.isLoading
+                ? const Padding(
+                    padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
+                    child: SkeletonList(),
+                  )
+                : filtered.isEmpty
                 ? const EmptyState(
                     icon: Icons.search,
                     title: 'Aucun résultat',

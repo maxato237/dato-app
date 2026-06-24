@@ -7,6 +7,9 @@ import 'package:dato/features/auth/domain/auth_status.dart';
 abstract class AuthRepository {
   AuthStatus get status;
   Stream<AuthStatus> get authStateChanges;
+  /// Émet quand la session expire côté serveur (token non renouvelable).
+  /// Distinct d'un logout explicite par l'utilisateur.
+  Stream<void> get sessionExpiredEvents;
 
   /// Numéro saisi dans le formulaire précédent (pour l'afficher dans l'écran OTP).
   String? get pendingPhone;

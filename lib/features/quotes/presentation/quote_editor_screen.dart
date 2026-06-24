@@ -13,6 +13,7 @@ import 'package:dato/features/quotes/widgets/section_card.dart';
 import 'package:dato/features/quotes/widgets/share_sheet.dart';
 import 'package:dato/features/quotes/widgets/total_card.dart';
 import 'package:dato/features/library/providers/articles_provider.dart';
+import 'package:dato/features/settings/domain/company.dart';
 import 'package:dato/features/settings/providers/company_provider.dart';
 
 class QuoteEditorScreen extends ConsumerStatefulWidget {
@@ -68,8 +69,7 @@ class _QuoteEditorScreenState extends ConsumerState<QuoteEditorScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _companyCard(context, company.initial, company.name,
-                        company.activity),
+                    _companyCard(context, company),
                     const SizedBox(height: 14),
                     _infosCard(context),
                     const SizedBox(height: 14),
@@ -137,6 +137,12 @@ class _QuoteEditorScreenState extends ConsumerState<QuoteEditorScreen> {
                     _kicker('Blocs de signature'),
                     const SizedBox(height: 8),
                     _signaturesCard(context, quote),
+                    if (company.hasLocation) ...[
+                      const SizedBox(height: 14),
+                      _kicker('Pied de page'),
+                      const SizedBox(height: 8),
+                      _footerPreview(company),
+                    ],
                   ],
                 ),
               ),
@@ -233,51 +239,46 @@ class _QuoteEditorScreenState extends ConsumerState<QuoteEditorScreen> {
   // ---------------------------------------------------------------------------
   // En-tête entreprise (lecture seule)
   // ---------------------------------------------------------------------------
-  Widget _companyCard(
-      BuildContext context, String initial, String name, String activity) {
+  Widget _companyCard(BuildContext context, Company company) {
     final head = Theme.of(context).textTheme.titleLarge!;
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.border),
-        borderRadius: BorderRadius.circular(AppRadii.lg),
-      ),
+
+    final Widget logoWidget = company.hasLogo
+        ? ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.network(
+              company.logoUrl,
+              width: 44,
+              height: 44,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) =>
+                  _initialBox(context, head, company.initial),
+            ),
+          )
+        : _initialBox(context, head, company.initial);
+
+    final Widget content = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
       child: Row(
         children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: AppColors.ink,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              initial,
-              style: head.copyWith(
-                  color: Colors.white,
-                  fontSize: 19,
-                  fontWeight: FontWeight.w800),
-            ),
-          ),
+          logoWidget,
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(name,
+                Text(company.name,
                     style: head.copyWith(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                         color: AppColors.ink)),
-                Text(activity,
+                Text(company.activity,
                     style: const TextStyle(
                         fontSize: 12, color: AppColors.textMuted)),
                 const SizedBox(height: 2),
                 const Row(
                   children: [
-                    Icon(Icons.info_outline, size: 12, color: AppColors.textLight),
+                    Icon(Icons.info_outline,
+                        size: 12, color: AppColors.textLight),
                     SizedBox(width: 4),
                     Flexible(
                       child: Text('En-tête modifiable dans Réglages',
@@ -291,6 +292,51 @@ class _QuoteEditorScreenState extends ConsumerState<QuoteEditorScreen> {
             ),
           ),
         ],
+      ),
+    );
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(AppRadii.lg),
+      ),
+      child: content,
+    );
+  }
+
+  Widget _initialBox(BuildContext context, TextStyle head, String initial) {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: AppColors.ink,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        initial,
+        style: head.copyWith(
+            color: Colors.white, fontSize: 19, fontWeight: FontWeight.w800),
+      ),
+    );
+  }
+
+  Widget _footerPreview(Company company) {
+    // Bandeau coloré avec le texte de localisation (plus d'image de fond).
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: AppColors.ink,
+        borderRadius: BorderRadius.circular(AppRadii.lg),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      alignment: Alignment.center,
+      child: Text(
+        company.location,
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+            color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700),
       ),
     );
   }

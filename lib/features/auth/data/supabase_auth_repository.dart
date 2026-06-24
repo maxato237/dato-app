@@ -41,6 +41,9 @@ class SupabaseAuthRepository implements AuthRepository {
   }
 
   @override
+  Stream<void> get sessionExpiredEvents => const Stream<void>.empty();
+
+  @override
   Stream<AuthStatus> get authStateChanges {
     final c = _client;
     if (c == null) return Stream.value(AuthStatus.unauthenticated);

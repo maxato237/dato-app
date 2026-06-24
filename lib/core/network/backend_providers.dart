@@ -1,17 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'backend_api_client.dart';
+import 'network_providers.dart';
 
-const _kBackendBaseUrl = String.fromEnvironment(
-  'BACKEND_BASE_URL',
-  defaultValue: 'http://10.0.2.2:5000',
-);
-
-/// Adresse du backend Flask. En dev, utilisez :
-///   --dart-define=BACKEND_BASE_URL=http://localhost:5000
-final backendBaseUrlProvider = Provider<String>((_) => _kBackendBaseUrl);
+/// URL du backend pour le client « brut » (health check). Pointe sur la **même**
+/// adresse que l'API REST authentifiée ([kApiBaseUrl]) afin d'éviter toute
+/// divergence d'hôte. Configurez via `--dart-define=API_BASE_URL=...`.
+final backendBaseUrlProvider = Provider<String>((_) => kApiBaseUrl);
 
 final backendApiClientProvider = Provider<BackendApiClient>((ref) {
-  final baseUrl = ref.read(backendBaseUrlProvider);
-  return BackendApiClient(baseUrl);
+  return BackendApiClient(ref.read(backendBaseUrlProvider));
 });

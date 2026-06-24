@@ -1,5 +1,4 @@
-import 'dart:typed_data';
-
+import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart' show networkImage;
@@ -26,32 +25,40 @@ const int _puFlex = 20;
 const int _ptFlex = 22;
 
 /// Construit le PDF A4 d'un devis (1 page), fidèle à `Gabarit PDF A4.html`.
+///
+/// Utilise la police Inter (bundlée dans les assets) pour un rendu correct
+/// de tous les caractères Unicode, y compris les ligatures françaises : œ, æ…
 Future<Uint8List> buildQuotePdf({
   required Quote quote,
   required Company company,
 }) async {
-  final doc = pw.Document(title: quote.number, author: company.name);
+  // Charger Inter depuis les assets pour supporter œ, æ et tous les accents.
+  final ByteData fontData = await rootBundle.load('assets/fonts/Inter.ttf');
+  final pw.Font interFont = pw.Font.ttf(fontData);
+
+  final doc = pw.Document(
+    title: quote.number,
+    author: company.name,
+    // Thème global : Inter remplace Helvetica sur tout le document.
+    theme: pw.ThemeData.withFont(
+      base: interFont,
+      bold: interFont, // même fichier — le package gère la simulation gras
+      italic: interFont,
+      boldItalic: interFont,
+    ),
+  );
   final total = quote.grandTotal;
 
-  // Récupération réseau des images (logo, couverture, bannière de pied).
-  // Échec silencieux : le document se construit sans l'image concernée.
+  // Récupération réseau du logo (échec silencieux).
   final logoImg = company.hasLogo ? await _tryImage(company.logoUrl) : null;
-  final headerImg =
-      company.hasHeaderImage ? await _tryImage(company.headerImageUrl) : null;
-  final footerImg =
-      company.hasFooterImage ? await _tryImage(company.footerImageUrl) : null;
 
   doc.addPage(
-    pw.Page(
+    pw.MultiPage(
       pageFormat: PdfPageFormat.a4,
       margin: const pw.EdgeInsets.all(34),
-      build: (context) => pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.stretch,
-        children: [
-          if (headerImg != null) ...[
-            _coverImage(headerImg),
-            pw.SizedBox(height: 14),
-          ],
+      // MultiPage (et non Page) : le contenu long se pagine au lieu d'être
+      // rogné — le pied de page (localisation) reste toujours visible.
+      build: (context) => [
           _header(company, logoImg),
           pw.SizedBox(height: 18),
           pw.Align(
@@ -73,7 +80,8 @@ Future<Uint8List> buildQuotePdf({
           pw.SizedBox(height: 14),
           pw.Center(
             child: pw.Text(
-              'Devis estimatif quantitatif pour ${quote.object.toLowerCase()}',
+              'Devis estimatif quantitatif pour ${quote.object}'
+                  .toUpperCase(),
               textAlign: pw.TextAlign.center,
               style: pw.TextStyle(
                 fontSize: 14,
@@ -99,7 +107,9 @@ Future<Uint8List> buildQuotePdf({
             ),
           ),
           pw.SizedBox(height: 14),
-          _table(quote, total),
+          // Lignes étalées au premier niveau : MultiPage peut paginer entre
+          // elles (bordures portées par chaque ligne, cf. _row).
+          ..._tableRows(quote, total),
           pw.SizedBox(height: 16),
           pw.RichText(
             text: pw.TextSpan(
@@ -132,12 +142,11 @@ Future<Uint8List> buildQuotePdf({
           ],
           pw.SizedBox(height: 34),
           _signatures(quote),
-          if (footerImg != null || company.hasLocation) ...[
+          if (company.hasLocation) ...[
             pw.SizedBox(height: 26),
-            _footerBanner(company, footerImg),
+            _footerBanner(company),
           ],
-        ],
-      ),
+      ],
     ),
   );
 
@@ -152,30 +161,8 @@ Future<pw.ImageProvider?> _tryImage(String url) async {
   }
 }
 
-pw.Widget _coverImage(pw.ImageProvider img) {
-  return pw.ClipRRect(
-    horizontalRadius: 6,
-    verticalRadius: 6,
-    child: pw.Container(
-      width: double.infinity,
-      constraints: const pw.BoxConstraints(maxHeight: 110),
-      child: pw.Image(img, fit: pw.BoxFit.contain),
-    ),
-  );
-}
-
-pw.Widget _footerBanner(Company company, pw.ImageProvider? img) {
-  if (img != null) {
-    return pw.ClipRRect(
-      horizontalRadius: 6,
-      verticalRadius: 6,
-      child: pw.Container(
-        width: double.infinity,
-        constraints: const pw.BoxConstraints(maxHeight: 90),
-        child: pw.Image(img, fit: pw.BoxFit.contain),
-      ),
-    );
-  }
+pw.Widget _footerBanner(Company company) {
+  // Bandeau coloré avec le texte de localisation (plus d'image de fond).
   return pw.Container(
     width: double.infinity,
     decoration: const pw.BoxDecoration(
@@ -248,10 +235,14 @@ pw.Widget _header(Company company, [pw.ImageProvider? logo]) {
   );
 }
 
-pw.Widget _table(Quote quote, double total) {
+List<pw.Widget> _tableRows(Quote quote, double total) {
   final rows = <pw.Widget>[_headerRow()];
 
   for (final sec in quote.sections) {
+    // En-tête de section (optionnelle) au-dessus des lignes.
+    if (sec.hasVisibleTitle) {
+      rows.add(_spanRow(sec.title.toUpperCase(), '', bg: _headBg));
+    }
     for (final l in sec.lines) {
       rows.add(_row(bottom: _lineBorder, cells: [
         _cell(l.designation, flex: _desFlex),
@@ -302,20 +293,14 @@ pw.Widget _table(Quote quote, double total) {
     }
   }
 
-  rows.add(_spanRow('Total général', formatMoney(total),
+  rows.add(_spanRow('TOTAL GÉNÉRAL', formatMoney(total),
       bg: _ink, fg: PdfColors.white));
 
-  return pw.Container(
-    decoration: pw.BoxDecoration(border: pw.Border.all(color: _docBorder)),
-    child: pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.stretch,
-      children: rows,
-    ),
-  );
+  return rows;
 }
 
 pw.Widget _headerRow() {
-  return _row(bottom: _docBorder, cells: [
+  return _row(bottom: _docBorder, top: true, cells: [
     _cell('Désignation', flex: _desFlex, head: true, align: pw.TextAlign.center),
     _cell('Qté', flex: _qtyFlex, head: true, align: pw.TextAlign.center),
     _cell('P.U', flex: _puFlex, head: true, align: pw.TextAlign.center),
@@ -346,10 +331,23 @@ pw.Widget _spanRow(String label, String value,
   ]);
 }
 
-pw.Widget _row({required List<pw.Widget> cells, required PdfColor bottom}) {
+pw.Widget _row({
+  required List<pw.Widget> cells,
+  required PdfColor bottom,
+  bool top = false,
+}) {
+  // Bordures gauche/droite portées par chaque ligne (le cadre extérieur n'est
+  // plus un Container englobant, pour permettre la pagination par MultiPage).
   return pw.Container(
     decoration: pw.BoxDecoration(
-      border: pw.Border(bottom: pw.BorderSide(color: bottom)),
+      border: pw.Border(
+        left: const pw.BorderSide(color: _docBorder),
+        right: const pw.BorderSide(color: _docBorder),
+        bottom: pw.BorderSide(color: bottom),
+        top: top
+            ? const pw.BorderSide(color: _docBorder)
+            : pw.BorderSide.none,
+      ),
     ),
     // Pas de `stretch` ici : le paquet `pdf` n'a pas d'IntrinsicHeight, et
     // étirer sur une hauteur non bornée fait s'effondrer le tableau.

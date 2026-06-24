@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:dato/core/theme/app_theme.dart';
 
 /// Mise en page commune à tous les écrans auth :
@@ -49,23 +50,10 @@ class AuthScreen extends StatelessWidget {
                             ),
                           )
                         else
-                          Container(
-                            width: 38,
-                            height: 38,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withAlpha(40),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            alignment: Alignment.center,
-                            child: const Text(
-                              'D',
-                              style: TextStyle(
-                                fontFamily: 'Sora',
-                                fontWeight: FontWeight.w800,
-                                fontSize: 18,
-                                color: Colors.white,
-                              ),
-                            ),
+                          SvgPicture.asset(
+                            'assets/icons/dato_logo.svg',
+                            width: 40,
+                            height: 40,
                           ),
                         const SizedBox(width: 10),
                         const Text(

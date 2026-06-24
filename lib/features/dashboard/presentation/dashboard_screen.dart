@@ -2,17 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:dato/core/config/app_config.dart';
 import 'package:dato/core/router/routes.dart';
 import 'package:dato/core/theme/app_theme.dart';
 import 'package:dato/core/utils/formatters.dart';
 import 'package:dato/core/widgets/dato_button.dart';
 import 'package:dato/core/widgets/dato_toast.dart';
+import 'package:dato/core/widgets/skeleton_list.dart';
 import 'package:dato/features/dashboard/widgets/quota_card.dart';
 import 'package:dato/features/dashboard/widgets/stat_card.dart';
 import 'package:dato/features/quotes/domain/quote.dart';
 import 'package:dato/features/quotes/providers/quotes_list_controller.dart';
 import 'package:dato/features/quotes/widgets/quote_actions_sheet.dart';
 import 'package:dato/features/quotes/widgets/quote_card.dart';
+import 'package:dato/features/settings/domain/company.dart';
 import 'package:dato/features/settings/providers/company_provider.dart';
 
 class DashboardScreen extends ConsumerWidget {
@@ -20,8 +23,8 @@ class DashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final quotes =
-        ref.watch(quotesStreamProvider).valueOrNull ?? const <Quote>[];
+    final quotesAsync = ref.watch(quotesStreamProvider);
+    final quotes = quotesAsync.valueOrNull ?? const <Quote>[];
     final company = ref.watch(currentCompanyProvider);
     final now = DateTime.now();
     final monthCount = quotesThisMonth(quotes, now); // quota mensuel du forfait
@@ -36,7 +39,7 @@ class DashboardScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _dashTop(context, company.initial, company.name),
+            _dashTop(context, company),
             Expanded(
               child: SingleChildScrollView(
                 child: Padding(
@@ -47,9 +50,13 @@ class DashboardScreen extends ConsumerWidget {
                       QuotaCard(
                         used: monthCount,
                         limit: kFreeQuota,
-                        onUpgrade: () => DatoToast.show(context,
-                            message: 'Le passage à Pro arrive en Phase 7',
-                            variant: DatoToastVariant.info),
+                        // Lancement en accès libre : pas de quota ni de CTA Pro.
+                        unlimited: !kBillingEnabled,
+                        onUpgrade: kBillingEnabled
+                            ? () => DatoToast.show(context,
+                                message: 'Le passage à Pro arrive en Phase 7',
+                                variant: DatoToastVariant.info)
+                            : null,
                       ),
                       const SizedBox(height: 14),
                       Row(
@@ -77,7 +84,9 @@ class DashboardScreen extends ConsumerWidget {
                       _sectionTitle(context, 'Devis récents',
                           onSeeAll: () => context.go(Routes.quotes)),
                       const SizedBox(height: 12),
-                      if (recents.isEmpty)
+                      if (quotesAsync.isLoading)
+                        const SkeletonList(itemCount: 3)
+                      else if (recents.isEmpty)
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 12),
                           child: Text('Aucun devis pour l’instant.',
@@ -112,7 +121,19 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _dashTop(BuildContext context, String initial, String name) {
+  Widget _dashTop(BuildContext context, Company company) {
+    final Widget avatar = company.hasLogo
+        ? ClipOval(
+            child: Image.network(
+              company.logoUrl,
+              width: 46,
+              height: 46,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => _letterAvatar(context, company.initial),
+            ),
+          )
+        : _letterAvatar(context, company.initial);
+
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.surface,
@@ -121,18 +142,7 @@ class DashboardScreen extends ConsumerWidget {
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
       child: Row(
         children: [
-          Container(
-            width: 46,
-            height: 46,
-            decoration: const BoxDecoration(
-                color: AppColors.ink, shape: BoxShape.circle),
-            alignment: Alignment.center,
-            child: Text(initial,
-                style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                    color: Colors.white,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700)),
-          ),
+          avatar,
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -140,7 +150,7 @@ class DashboardScreen extends ConsumerWidget {
               children: [
                 const Text('Bonjour,',
                     style: TextStyle(fontSize: 13, color: AppColors.textMuted)),
-                Text(name,
+                Text(company.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context)
@@ -163,6 +173,21 @@ class DashboardScreen extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _letterAvatar(BuildContext context, String initial) {
+    return Container(
+      width: 46,
+      height: 46,
+      decoration:
+          const BoxDecoration(color: AppColors.ink, shape: BoxShape.circle),
+      alignment: Alignment.center,
+      child: Text(
+        initial,
+        style: Theme.of(context).textTheme.titleLarge!.copyWith(
+            color: Colors.white, fontSize: 17, fontWeight: FontWeight.w700),
       ),
     );
   }

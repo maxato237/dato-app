@@ -81,6 +81,39 @@ class SectionCard extends StatelessWidget {
             ),
           ),
 
+          // Visibilité du titre comme en-tête dans le devis rendu
+          InkWell(
+            key: Key('toggle-section-title-${section.id}'),
+            onTap: () =>
+                controller.setSectionShowTitle(section.id, !section.showTitle),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(10, 6, 12, 4),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: Checkbox(
+                      value: section.showTitle,
+                      visualDensity: VisualDensity.compact,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      onChanged: (v) => controller.setSectionShowTitle(
+                          section.id, v ?? true),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Flexible(
+                    child: Text(
+                      'Afficher le titre dans le devis',
+                      style: TextStyle(
+                          fontSize: 12.5, color: AppColors.textMuted),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
           // Lignes (réordonnables par poignée)
           ReorderableListView.builder(
             buildDefaultDragHandles: false,

@@ -8,6 +8,7 @@ class MockAuthRepository extends Mock implements AuthRepository {}
 /// Implémentation minimale pour les tests d'intégration.
 class FakeAuthRepository implements AuthRepository {
   final _ctrl = StreamController<AuthStatus>.broadcast();
+  final _sessionExpiredCtrl = StreamController<void>.broadcast();
   AuthStatus _status = AuthStatus.unauthenticated;
   String? _pendingPhone;
   bool _isResetFlow = false;
@@ -17,6 +18,9 @@ class FakeAuthRepository implements AuthRepository {
 
   @override
   Stream<AuthStatus> get authStateChanges => _ctrl.stream;
+
+  @override
+  Stream<void> get sessionExpiredEvents => _sessionExpiredCtrl.stream;
 
   @override
   String? get pendingPhone => _pendingPhone;
@@ -80,5 +84,8 @@ class FakeAuthRepository implements AuthRepository {
     _ctrl.add(_status);
   }
 
-  void dispose() => _ctrl.close();
+  void dispose() {
+    _ctrl.close();
+    _sessionExpiredCtrl.close();
+  }
 }

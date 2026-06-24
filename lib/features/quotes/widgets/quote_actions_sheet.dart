@@ -14,6 +14,7 @@ import 'package:dato/features/pdf/quote_pdf.dart';
 import 'package:dato/features/quotes/domain/quote.dart';
 import 'package:dato/features/quotes/widgets/share_sheet.dart';
 import 'package:dato/features/settings/domain/company.dart';
+import 'package:dato/features/settings/providers/company_provider.dart';
 
 enum _QuoteAction { edit, duplicate, share, pdf, status, delete }
 
@@ -98,9 +99,10 @@ class _ActionsMenu extends StatelessWidget {
 
 Future<void> _duplicate(BuildContext context, WidgetRef ref, Quote quote) async {
   final repo = ref.read(quoteRepositoryProvider);
+  final company = ref.read(currentCompanyProvider);
   final copy = Quote(
     id: newId(),
-    number: _nextNumber(repo),
+    number: _nextNumber(repo, company.quotePrefix),
     date: _todayIso(),
     object: quote.object,
     client: quote.client,
@@ -198,8 +200,8 @@ String _todayIso() {
   return '${now.year}-$m-$d';
 }
 
-String _nextNumber(QuoteRepository repo) {
+String _nextNumber(QuoteRepository repo, [String prefix = 'DV']) {
   final year = DateTime.now().year;
   final seq = (repo.getAll().length + 1).toString().padLeft(3, '0');
-  return 'DV-$year-$seq';
+  return '${prefix.isEmpty ? 'DV' : prefix}-$year-$seq';
 }

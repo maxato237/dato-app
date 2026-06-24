@@ -5,7 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dato/core/utils/id.dart';
 import 'package:dato/data/repositories/quote_repository.dart';
 import 'package:dato/features/library/domain/article.dart';
+import 'package:dato/features/library/providers/articles_provider.dart';
 import 'package:dato/features/quotes/domain/quote.dart';
+import 'package:dato/features/settings/providers/company_provider.dart';
 
 /// État de l'auto-enregistrement, reflété par l'indicateur d'en-tête.
 enum SaveStatus { saving, saved }
@@ -65,9 +67,23 @@ class QuoteEditorController
     _debounce?.cancel();
     _debounce = Timer(kAutosaveDebounce, () async {
       await _repo.save(state.quote);
+      _autoSaveArticles(state.quote);
       if (_disposed) return;
       state = state.copyWith(saveStatus: SaveStatus.saved);
     });
+  }
+
+  /// Mémorise dans la bibliothèque les désignations saisies dans le devis qui
+  /// n'y figurent pas encore (auto-enregistrement des articles).
+  void _autoSaveArticles(Quote quote) {
+    final notifier = ref.read(articlesNotifierProvider.notifier);
+    for (final section in quote.sections) {
+      for (final line in section.lines) {
+        if (line.designation.trim().isNotEmpty) {
+          notifier.ensure(line.designation, line.pu.round());
+        }
+      }
+    }
   }
 
   Quote _withSections(List<Section> sections) =>
@@ -76,7 +92,15 @@ class QuoteEditorController
       state.quote.copyWith(rubriques: rubriques);
 
   // ---- En-tête ----
-  void setObject(String v) => _apply(state.quote.copyWith(object: v));
+  void setObject(String v) {
+    var quote = state.quote.copyWith(object: v);
+    // Numérotation « par objet » : le numéro suit l'objet en temps réel.
+    if (ref.read(currentCompanyProvider).quoteNumberByObject) {
+      quote = quote.copyWith(number: _composeNumber(v));
+    }
+    _apply(quote);
+  }
+
   void setClient(String v) => _apply(state.quote.copyWith(client: v));
   void setDate(String v) => _apply(state.quote.copyWith(date: v));
 
@@ -96,6 +120,12 @@ class QuoteEditorController
   void setSectionTitle(String sectionId, String title) =>
       _apply(_withSections(state.quote.sections
           .map((s) => s.id == sectionId ? s.copyWith(title: title) : s)
+          .toList()));
+
+  void setSectionShowTitle(String sectionId, bool showTitle) =>
+      _apply(_withSections(state.quote.sections
+          .map((s) =>
+              s.id == sectionId ? s.copyWith(showTitle: showTitle) : s)
           .toList()));
 
   void reorderSections(int oldIndex, int newIndex) =>
@@ -235,12 +265,12 @@ class QuoteEditorController
 
   Quote _newQuote() => Quote(
         id: newId(),
-        number: _autoNumber(),
+        number: _composeNumber(''),
         date: _today(),
         object: '',
         client: '',
         status: QuoteStatus.draft,
-        companyId: 'demo-company',
+        companyId: ref.read(currentCompanyProvider).id,
         sections: const [],
         rubriques: const [],
         signatures: [
@@ -249,10 +279,19 @@ class QuoteEditorController
         ],
       );
 
-  String _autoNumber() {
+  /// Compose le numéro de devis selon le mode choisi en réglages :
+  /// - par défaut : « PRÉFIXE-ANNÉE-SÉQUENCE » (ex. DV-2026-001) ;
+  /// - « par objet » : « PRÉFIXE-OBJET » (l'objet remplace année-séquence).
+  String _composeNumber(String object) {
+    final company = ref.read(currentCompanyProvider);
+    final prefix = company.quotePrefix.isEmpty ? 'DV' : company.quotePrefix;
+    if (company.quoteNumberByObject) {
+      final obj = object.trim();
+      return obj.isEmpty ? prefix : '$prefix-$obj';
+    }
     final year = DateTime.now().year;
     final seq = (_repo.getAll().length + 1).toString().padLeft(3, '0');
-    return 'DV-$year-$seq';
+    return '$prefix-$year-$seq';
   }
 
   String _today() {

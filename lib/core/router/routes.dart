@@ -1,4 +1,5 @@
 class Routes {
+  static const splash = '/splash';
   static const home = '/home';
   static const quotes = '/quotes';
   static const quoteEditor = '/quote/:id';
@@ -20,6 +21,7 @@ class Routes {
   static const billingResult = '/billing/result';
   static const billingSubscription = '/billing/subscription';
   static const publicQuote = '/p/:token';
+  static const legal = '/legal';
 
   static String quoteEditorPath(String id) => '/quote/$id';
   static String quotePreviewPath(String id) => '/quote/$id/preview';

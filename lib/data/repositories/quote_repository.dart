@@ -1,6 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:dato/data/local/isar_quote_repository.dart';
+import 'package:dato/data/local/isar_service.dart';
+import 'package:dato/data/sync/quote_sync_service.dart';
 import 'package:dato/features/quotes/domain/quote.dart';
 import 'in_memory_quote_repository.dart';
+import 'syncing_quote_repository.dart';
 
 /// Source de vérité locale des devis (offline-first).
 ///
@@ -29,10 +33,23 @@ abstract class QuoteRepository {
 
 /// Implémentation active du dépôt de devis.
 ///
-/// Aujourd'hui : [InMemoryQuoteRepository] (persistance en mémoire, seedée).
-/// Demain : implémentation Isar branchée ici, sans toucher au reste du code.
+/// Local durable : [IsarQuoteRepository] quand Isar est ouvert (cf.
+/// [isarProvider], injecté dans `main`). Repli : [InMemoryQuoteRepository]
+/// (seedé) pour les tests ou si l'ouverture d'Isar échoue. Dans les deux cas,
+/// décoré par [SyncingQuoteRepository] (file de sync + rejeu serveur).
 final quoteRepositoryProvider = Provider<QuoteRepository>((ref) {
-  final repo = InMemoryQuoteRepository()..seedDemo();
-  ref.onDispose(repo.dispose);
-  return repo;
+  final isar = ref.watch(isarProvider);
+  final QuoteRepository local;
+  if (isar != null) {
+    local = IsarQuoteRepository(isar);
+  } else {
+    final mem = InMemoryQuoteRepository();
+    ref.onDispose(mem.dispose);
+    local = mem;
+  }
+  return SyncingQuoteRepository(
+    local,
+    ref.watch(syncQueueProvider),
+    onEnqueued: () => ref.read(quoteSyncServiceProvider).drain(),
+  );
 });

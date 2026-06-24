@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:dato/core/theme/app_theme.dart';
+import 'package:dato/core/widgets/app_network_image.dart';
 import 'package:dato/core/utils/dates.dart';
 import 'package:dato/core/utils/formatters.dart';
 import 'package:dato/core/utils/montant_en_lettres.dart';
@@ -46,7 +47,7 @@ class QuoteDocument extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _companyHeader(), // L'image d'en-tête est le fond du cadre, pas un élément séparé
+          _companyHeader(),
           SizedBox(height: 18 * _fs),
           // Ville, le <date>
           Align(
@@ -69,7 +70,8 @@ class QuoteDocument extends StatelessWidget {
           // Objet
           Center(
             child: Text(
-              'Devis estimatif quantitatif pour ${quote.object.toLowerCase()}',
+              'Devis estimatif quantitatif pour ${quote.object}'
+                  .toUpperCase(),
               textAlign: TextAlign.center,
               style: _head(context).copyWith(
                 fontSize: 14 * _fs,
@@ -134,7 +136,7 @@ class QuoteDocument extends StatelessWidget {
           ],
           SizedBox(height: 34 * _fs),
           _signatures(),
-          if (company.hasFooterImage || company.hasLocation) ...[
+          if (company.hasLocation) ...[
             SizedBox(height: 26 * _fs),
             _footerBanner(),
           ],
@@ -147,51 +149,7 @@ class QuoteDocument extends StatelessWidget {
       Theme.of(context).textTheme.titleLarge!;
 
   Widget _footerBanner() {
-    final bool hasBg = company.hasFooterImage;
-    final bool hasText = company.hasLocation;
-
-    if (hasBg) {
-      // Image rognée à la taille exacte du cadre, texte par-dessus si renseigné.
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(6),
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: Image.network(
-                company.footerImageUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(color: AppColors.ink),
-              ),
-            ),
-            if (hasText)
-              Positioned.fill(
-                child: Container(color: Colors.black.withValues(alpha: 0.45)),
-              ),
-            // Le contenu non-positionné détermine la hauteur du Stack.
-            Padding(
-              padding:
-                  EdgeInsets.symmetric(horizontal: 16, vertical: 14 * _fs),
-              child: hasText
-                  ? Center(
-                      child: Text(
-                        company.location,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 13 * _fs,
-                          fontWeight: FontWeight.w700,
-                          height: 1.3,
-                        ),
-                      ),
-                    )
-                  : SizedBox(width: double.infinity, height: 40 * _fs),
-            ),
-          ],
-        ),
-      );
-    }
-
-    // Pas d'image : bandeau coloré avec le texte de localisation.
+    // Bandeau coloré avec le texte de localisation (plus d'image de fond).
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -214,16 +172,7 @@ class QuoteDocument extends StatelessWidget {
   }
 
   Widget _companyHeader() {
-    final bool hasBg = company.hasHeaderImage;
-
-    // Couleurs adaptatives : blanc sur fond image, sombres sans fond.
-    final Color nameColor = hasBg ? Colors.white : AppColors.ink;
-    final Color subColor =
-        hasBg ? Colors.white.withValues(alpha: 0.90) : AppColors.text;
-    final Color mutedColor =
-        hasBg ? Colors.white.withValues(alpha: 0.75) : AppColors.textMuted;
-
-    // Contenu adaptatif (logo + nom/activité/coordonnées).
+    // Pas d'image de fond — cadre bordé classique.
     final Widget inner = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Row(
@@ -232,12 +181,12 @@ class QuoteDocument extends StatelessWidget {
           if (company.hasLogo) ...[
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.network(
+              child: AppNetworkImage(
                 company.logoUrl,
                 width: 52,
                 height: 52,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                errorBuilder: (_) => const SizedBox.shrink(),
               ),
             ),
             const SizedBox(width: 14),
@@ -252,7 +201,7 @@ class QuoteDocument extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 22 * _fs,
                     fontWeight: FontWeight.w800,
-                    color: nameColor,
+                    color: AppColors.ink,
                     letterSpacing: 0.5,
                     height: 1.1,
                   ),
@@ -265,7 +214,7 @@ class QuoteDocument extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 13 * _fs,
                       fontWeight: FontWeight.w600,
-                      color: subColor,
+                      color: AppColors.text,
                     ),
                   ),
                 ],
@@ -280,7 +229,8 @@ class QuoteDocument extends StatelessWidget {
                         'Tél : ${company.phones.trim()}',
                     ].join(' — '),
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 11 * _fs, color: mutedColor),
+                    style:
+                        TextStyle(fontSize: 11 * _fs, color: AppColors.textMuted),
                   ),
                 ],
               ],
@@ -290,32 +240,6 @@ class QuoteDocument extends StatelessWidget {
       ),
     );
 
-    if (hasBg) {
-      // Image rognée à la taille exacte du cadre + voile sombre pour lisibilité.
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(6),
-        child: Stack(
-          children: [
-            // Fond : image réseau rognée (BoxFit.cover = jamais déformée).
-            Positioned.fill(
-              child: Image.network(
-                company.headerImageUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(color: AppColors.ink),
-              ),
-            ),
-            // Voile semi-transparent pour la lisibilité du texte.
-            Positioned.fill(
-              child: Container(color: Colors.black.withValues(alpha: 0.50)),
-            ),
-            // Contenu par-dessus — sa hauteur détermine celle du Stack.
-            inner,
-          ],
-        ),
-      );
-    }
-
-    // Sans image de fond : bordure classique.
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: AppColors.ink, width: 2),
@@ -331,6 +255,11 @@ class QuoteDocument extends StatelessWidget {
     ];
 
     for (final sec in quote.sections) {
+      // En-tête de section (optionnelle) au-dessus des lignes.
+      if (sec.hasVisibleTitle) {
+        rows.add(_spanRow(sec.title.toUpperCase(), '',
+            bg: _headBg, bold: true, head: true));
+      }
       for (final l in sec.lines) {
         rows.add(_lineRow(l));
       }
@@ -372,7 +301,7 @@ class QuoteDocument extends StatelessWidget {
       }
     }
 
-    rows.add(_spanRow('Total général', formatMoney(total),
+    rows.add(_spanRow('TOTAL GÉNÉRAL', formatMoney(total),
         bg: AppColors.ink, fg: Colors.white, bold: true, head: true));
 
     return Container(

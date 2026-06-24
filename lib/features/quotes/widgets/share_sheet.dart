@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:printing/printing.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:dato/core/network/network_providers.dart';
+import 'package:dato/data/remote/quote_remote_data_source.dart';
 import 'package:dato/core/theme/app_theme.dart';
 import 'package:dato/core/utils/formatters.dart';
 import 'package:dato/core/widgets/dato_bottom_sheet.dart';
 import 'package:dato/core/widgets/dato_button.dart';
 import 'package:dato/core/widgets/dato_toast.dart';
-import 'package:dato/features/pdf/quote_pdf.dart';
+import 'package:dato/features/pdf/template_pdf.dart';
 import 'package:dato/features/quotes/domain/quote.dart';
 import 'package:dato/features/settings/domain/company.dart';
 
@@ -26,14 +29,7 @@ Future<void> showShareSheet(
   );
 }
 
-/// Lien public provisoire — remplacé par un vrai token révocable en Phase 6.
-String _publicLink(Quote quote) => 'https://dato.app/p/${quote.id}';
-
-String _shareText(Quote quote) =>
-    'Devis ${quote.number} — ${quote.object}\n'
-    'Montant : ${formatFcfa(quote.grandTotal)}\n${_publicLink(quote)}';
-
-class ShareSheetContent extends StatelessWidget {
+class ShareSheetContent extends ConsumerWidget {
   const ShareSheetContent({
     super.key,
     required this.quote,
@@ -44,7 +40,7 @@ class ShareSheetContent extends StatelessWidget {
   final Company company;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -74,26 +70,26 @@ class ShareSheetContent extends StatelessWidget {
           key: const Key('share-whatsapp'),
           label: 'Partager sur WhatsApp',
           icon: const Icon(Icons.chat_outlined, size: 20),
-          onPressed: () => _whatsapp(context),
+          onPressed: () => _whatsapp(context, ref),
         ),
         const SizedBox(height: 10),
         DatoButton.secondary(
           key: const Key('share-copy'),
           label: 'Copier le lien',
           icon: const Icon(Icons.copy_outlined, size: 19),
-          onPressed: () => _copyLink(context),
+          onPressed: () => _copyLink(context, ref),
         ),
         const SizedBox(height: 10),
         DatoButton.secondary(
           key: const Key('share-pdf'),
           label: 'Télécharger le PDF',
           icon: const Icon(Icons.download_outlined, size: 19),
-          onPressed: () => _downloadPdf(context),
+          onPressed: () => _downloadPdf(context, ref),
         ),
         const SizedBox(height: 4),
         TextButton.icon(
           key: const Key('share-email'),
-          onPressed: () => _email(context),
+          onPressed: () => _email(context, ref),
           icon: const Icon(Icons.send_outlined, size: 18),
           style: TextButton.styleFrom(
             foregroundColor: AppColors.textMuted,
@@ -105,9 +101,23 @@ class ShareSheetContent extends StatelessWidget {
     );
   }
 
-  Future<void> _whatsapp(BuildContext context) async {
+  /// Lien public partageable. Active le lien côté backend et renvoie son URL ;
+  /// repli local si le devis n'est pas encore synchronisé (hors-ligne).
+  Future<String> _resolvePublicUrl(WidgetRef ref) async {
+    try {
+      return await ref.read(quoteRemoteDataSourceProvider).enableShare(quote.id);
+    } catch (_) {
+      return 'https://dato.app/p/${quote.id}';
+    }
+  }
+
+  String _shareText(String link) =>
+      'Devis ${quote.number} — ${quote.object}\n'
+      'Montant : ${formatFcfa(quote.grandTotal)}\n$link';
+
+  Future<void> _whatsapp(BuildContext context, WidgetRef ref) async {
     Navigator.of(context).pop();
-    final text = _shareText(quote);
+    final text = _shareText(await _resolvePublicUrl(ref));
     final uri = Uri.parse('whatsapp://send?text=${Uri.encodeComponent(text)}');
     try {
       if (await canLaunchUrl(uri)) {
@@ -120,35 +130,59 @@ class ShareSheetContent extends StatelessWidget {
     }
   }
 
-  Future<void> _copyLink(BuildContext context) async {
+  Future<void> _copyLink(BuildContext context, WidgetRef ref) async {
+    final ctx = Navigator.of(context, rootNavigator: true).context;
     Navigator.of(context).pop();
-    await Clipboard.setData(ClipboardData(text: _publicLink(quote)));
-    if (!context.mounted) return;
-    DatoToast.show(context,
+    final link = await _resolvePublicUrl(ref);
+    await Clipboard.setData(ClipboardData(text: link));
+    if (!ctx.mounted) return;
+    DatoToast.show(ctx,
         message: 'Lien copié dans le presse-papier',
         variant: DatoToastVariant.success);
   }
 
-  Future<void> _downloadPdf(BuildContext context) async {
-    Navigator.of(context).pop();
-    final bytes = await buildQuotePdf(quote: quote, company: company);
-    await Printing.sharePdf(
-      bytes: bytes,
-      filename: 'Devis-${quote.number}.pdf',
+  Future<void> _downloadPdf(BuildContext context, WidgetRef ref) async {
+    final api = ref.read(apiClientProvider);
+    final rootNav = Navigator.of(context, rootNavigator: true);
+    final ctx = rootNav.context;
+    Navigator.of(context).pop(); // ferme le bottom sheet
+
+    // Indicateur de chargement (la génération via modèle Word peut prendre
+    // quelques secondes côté backend).
+    showDialog<void>(
+      context: ctx,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
     );
+    try {
+      final bytes =
+          await resolveQuotePdf(apiClient: api, quote: quote, company: company);
+      rootNav.pop(); // ferme le loader
+      await Printing.sharePdf(
+        bytes: bytes,
+        filename: 'Devis-${quote.number}.pdf',
+      );
+    } catch (_) {
+      rootNav.pop();
+      if (!ctx.mounted) return;
+      DatoToast.show(ctx,
+          message: 'Échec de la génération du PDF',
+          variant: DatoToastVariant.error);
+    }
   }
 
-  Future<void> _email(BuildContext context) async {
+  Future<void> _email(BuildContext context, WidgetRef ref) async {
+    final ctx = Navigator.of(context, rootNavigator: true).context;
     Navigator.of(context).pop();
     final subject = 'Devis ${quote.number} — ${company.name}';
-    final body = _shareText(quote);
+    final body = _shareText(await _resolvePublicUrl(ref));
     final uri = Uri.parse(
         'mailto:?subject=${Uri.encodeComponent(subject)}&body=${Uri.encodeComponent(body)}');
     try {
       await launchUrl(uri);
     } catch (_) {
-      if (!context.mounted) return;
-      DatoToast.show(context,
+      if (!ctx.mounted) return;
+      DatoToast.show(ctx,
           message: "Aucune application e-mail trouvée",
           variant: DatoToastVariant.error);
     }

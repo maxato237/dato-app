@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:dato/core/config/app_config.dart';
 import 'package:dato/core/router/routes.dart';
 import 'package:dato/core/theme/app_theme.dart';
 import 'package:dato/core/widgets/dato_text_field.dart';
@@ -21,6 +22,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _pwCtrl = TextEditingController();
   bool _loading = false;
   String? _error;
+  String? _idErr;
+  String? _pwErr;
 
   @override
   void dispose() {
@@ -32,11 +35,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _submit() async {
     final id = _idCtrl.text.trim();
     final pw = _pwCtrl.text;
-    if (id.isEmpty || pw.isEmpty) return;
+
+    final idErr =
+        id.isEmpty ? 'Le téléphone ou l\'e-mail est obligatoire.' : null;
+    final pwErr = pw.isEmpty ? 'Le mot de passe est obligatoire.' : null;
+    if (idErr != null || pwErr != null) {
+      setState(() {
+        _idErr = idErr;
+        _pwErr = pwErr;
+      });
+      return;
+    }
 
     setState(() {
       _loading = true;
       _error = null;
+      _idErr = null;
+      _pwErr = null;
     });
     try {
       await ref
@@ -66,17 +81,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           label: 'Téléphone ou e-mail',
           hint: '+237 6 74 70 20 37',
           keyboardType: TextInputType.emailAddress,
+          error: _idErr,
+          onChanged: (_) {
+            if (_idErr != null) setState(() => _idErr = null);
+          },
         ),
         const SizedBox(height: 16),
         PwField(
           fieldKey: const Key('login_password'),
           controller: _pwCtrl,
+          error: _pwErr,
         ),
         const SizedBox(height: 4),
         Align(
           alignment: Alignment.centerRight,
           child: TextButton(
-            onPressed: () => context.push(Routes.onboardingForgot),
+            onPressed: () {
+              if (kSmsEnabled) {
+                context.push(Routes.onboardingForgot);
+              } else {
+                _showNoSmsDialog(context);
+              }
+            },
             child: const Text('Mot de passe oublié ?'),
           ),
         ),
@@ -102,6 +128,33 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ],
     );
   }
+}
+
+void _showNoSmsDialog(BuildContext context) {
+  showDialog<void>(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: const Text('Mot de passe oublié ?'),
+      content: const Text(
+        'La réinitialisation par SMS n\'est pas encore disponible.\n\n'
+        'Contactez-nous sur WhatsApp et nous réinitialiserons votre mot de passe rapidement.',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Fermer'),
+        ),
+        FilledButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+            // TODO: ouvrir WhatsApp avec le numéro kSupportWhatsApp
+            // url_launcher → wa.me/237674702037
+          },
+          child: const Text('WhatsApp : $kSupportWhatsApp'),
+        ),
+      ],
+    ),
+  );
 }
 
 class _ErrorBox extends StatelessWidget {

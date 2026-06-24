@@ -90,6 +90,78 @@ class ApiClient {
     }
   }
 
+  /// Supprime une image précédemment uploadée (Cloudinary) à partir de son URL.
+  /// Best-effort : un échec n'est pas propagé (l'orphelin sera nettoyé plus tard).
+  Future<void> deleteImage(String url) async {
+    if (url.isEmpty || !url.startsWith('http')) return;
+    try {
+      final token = await _storage.getAccessToken();
+      await _dio.delete(
+        '/api/uploads',
+        queryParameters: {'url': url},
+        data: {'url': url},
+        options: Options(
+          headers: {if (token != null) 'Authorization': 'Bearer $token'},
+        ),
+      );
+    } catch (_) {
+      // Best-effort : on ignore les erreurs (hors-ligne, endpoint absent…).
+    }
+  }
+
+  /// Envoie un fichier Word (.doc/.docx) vers `/api/company/template`,
+  /// met à jour `company.template_docx_url` côté backend, et retourne l'URL.
+  Future<String> uploadTemplate(String filePath) async {
+    try {
+      final token = await _storage.getAccessToken();
+      final formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(filePath),
+      });
+      final response = await _dio.post(
+        '/api/company/template',
+        data: formData,
+        options: Options(
+          headers: {if (token != null) 'Authorization': 'Bearer $token'},
+        ),
+      );
+      final data = (response.data as Map<String, dynamic>)['data']
+          as Map<String, dynamic>;
+      return data['url'] as String;
+    } on DioException catch (e) {
+      throw _mapError(e);
+    }
+  }
+
+  /// Retire le modèle Word de l'entreprise côté backend.
+  Future<void> deleteTemplate() async {
+    await _request('DELETE', '/api/company/template');
+  }
+
+  /// Génère le PDF d'un devis via le modèle Word de l'entreprise (backend).
+  ///
+  /// Renvoie les octets du PDF. Lève [ApiException] si aucun modèle n'est
+  /// configuré ou si la génération échoue (l'appelant retombe alors sur le
+  /// rendu local par défaut).
+  Future<List<int>> generateTemplatePdf(Map<String, dynamic> payload) async {
+    try {
+      final token = await _storage.getAccessToken();
+      final response = await _dio.post<List<int>>(
+        '/api/quotes/pdf',
+        data: payload,
+        options: Options(
+          responseType: ResponseType.bytes,
+          headers: {
+            if (token != null) 'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+      return response.data ?? const [];
+    } on DioException catch (e) {
+      throw _mapError(e);
+    }
+  }
+
   /// Télécharge un fichier binaire (ex. PDF).
   Future<List<int>> download(String path) async {
     final token = await _storage.getAccessToken();

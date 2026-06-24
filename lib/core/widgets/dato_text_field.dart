@@ -23,6 +23,7 @@ class DatoTextField extends StatelessWidget {
     this.maxLines = 1,
     this.minLines,
     this.inputFormatters,
+    this.textCapitalization = TextCapitalization.none,
   });
 
   final TextEditingController? controller;
@@ -44,6 +45,7 @@ class DatoTextField extends StatelessWidget {
   final int? maxLines;
   final int? minLines;
   final List<dynamic>? inputFormatters;
+  final TextCapitalization textCapitalization;
 
   @override
   Widget build(BuildContext context) {
@@ -70,6 +72,7 @@ class DatoTextField extends StatelessWidget {
           autofocus: autofocus,
           keyboardType: keyboardType,
           textInputAction: textInputAction,
+          textCapitalization: textCapitalization,
           onChanged: onChanged,
           onFieldSubmitted: onSubmitted,
           validator: validator,

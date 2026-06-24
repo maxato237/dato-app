@@ -16,6 +16,24 @@ subprojects {
     project.layout.buildDirectory.value(newSubprojectBuildDir)
 }
 subprojects {
+    // Workaround for old plugins (e.g. isar_flutter_libs 3.1.0+1) that declare a
+    // `package` in AndroidManifest.xml but no `namespace`, which AGP 8+ requires.
+    // Inject the manifest package as the namespace when one is missing. Must be
+    // registered before evaluationDependsOn(":app") so the project is not yet
+    // evaluated when afterEvaluate is added.
+    afterEvaluate {
+        val androidExt = extensions.findByName("android") as? com.android.build.gradle.BaseExtension
+        if (androidExt != null && androidExt.namespace == null) {
+            val manifestFile = file("src/main/AndroidManifest.xml")
+            if (manifestFile.exists()) {
+                val packageName =
+                    Regex("package=\"(.+?)\"").find(manifestFile.readText())?.groupValues?.get(1)
+                if (packageName != null) {
+                    androidExt.namespace = packageName
+                }
+            }
+        }
+    }
     project.evaluationDependsOn(":app")
 }
 

@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:dato/core/router/routes.dart';
 import 'package:dato/core/theme/app_theme.dart';
 import 'package:dato/core/widgets/dato_text_field.dart';
+import 'package:dato/features/auth/domain/auth_status.dart';
 import 'package:dato/features/auth/providers/auth_provider.dart';
 import 'package:dato/features/auth/widgets/auth_screen.dart';
 import 'package:dato/features/auth/widgets/pw_field.dart';
@@ -24,6 +25,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   final _pwCtrl = TextEditingController();
   bool _loading = false;
   String? _error;
+  String? _nameErr;
+  String? _phoneErr;
+  String? _pwErr;
 
   @override
   void dispose() {
@@ -39,28 +43,55 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     final phone = '+237${_phoneCtrl.text.trim().replaceAll(' ', '')}';
     final pw = _pwCtrl.text;
 
-    if (name.isEmpty || _phoneCtrl.text.trim().isEmpty || pw.isEmpty) {
-      setState(() => _error = 'Veuillez remplir tous les champs obligatoires.');
-      return;
-    }
-    if (pw.length < 8) {
-      setState(() => _error = 'Le mot de passe doit contenir au moins 8 caractères.');
+    final nameErr = name.isEmpty ? 'Le nom complet est obligatoire.' : null;
+    final phoneErr =
+        _phoneCtrl.text.trim().isEmpty ? 'Le téléphone est obligatoire.' : null;
+    final pwErr = pw.isEmpty
+        ? 'Le mot de passe est obligatoire.'
+        : (pw.length < 8
+            ? 'Le mot de passe doit contenir au moins 8 caractères.'
+            : null);
+
+    if (nameErr != null || phoneErr != null || pwErr != null) {
+      setState(() {
+        _error = null;
+        _nameErr = nameErr;
+        _phoneErr = phoneErr;
+        _pwErr = pwErr;
+      });
       return;
     }
 
     setState(() {
       _loading = true;
       _error = null;
+      _nameErr = null;
+      _phoneErr = null;
+      _pwErr = null;
     });
     try {
       final email = _emailCtrl.text.trim();
-      await ref.read(authRepositoryProvider).signUp(
-            name: name,
-            phone: phone,
-            password: pw,
-            email: email.isEmpty ? null : email,
-          );
-      if (mounted) context.push(Routes.onboardingOtp);
+      final repo = ref.read(authRepositoryProvider);
+      await repo.signUp(
+        name: name,
+        phone: phone,
+        password: pw,
+        email: email.isEmpty ? null : email,
+      );
+      if (mounted) {
+        // REQUIRE_OTP=false → tokens déjà reçus : aller au stepper de
+        // configuration entreprise (étape 1), qui crée l'entreprise via
+        // POST /api/company. Sans ça, le router enverrait l'utilisateur
+        // directement au dashboard sans entreprise → /api/quotes, /api/company
+        // et /api/company/template renvoient alors 404.
+        // REQUIRE_OTP=true  → aller à l'écran OTP ; la vérification SMS
+        // enchaînera ensuite sur le même stepper (onboarding1).
+        if (repo.status == AuthStatus.authenticated) {
+          context.go(Routes.onboarding1);
+        } else {
+          context.push(Routes.onboardingOtp);
+        }
+      }
     } on Exception catch (e) {
       if (mounted) setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
     } finally {
@@ -84,10 +115,20 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           controller: _nameCtrl,
           label: 'Nom complet',
           hint: 'Ex. Jean-Pierre Mballa',
+          error: _nameErr,
           textInputAction: TextInputAction.next,
+          onChanged: (_) {
+            if (_nameErr != null) setState(() => _nameErr = null);
+          },
         ),
         const SizedBox(height: 16),
-        _PhoneField(controller: _phoneCtrl),
+        _PhoneField(
+          controller: _phoneCtrl,
+          error: _phoneErr,
+          onChanged: (_) {
+            if (_phoneErr != null) setState(() => _phoneErr = null);
+          },
+        ),
         const SizedBox(height: 16),
         DatoTextField(
           key: const Key('signup_email'),
@@ -101,6 +142,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         PwField(
           fieldKey: const Key('signup_password'),
           controller: _pwCtrl,
+          error: _pwErr,
         ),
         const SizedBox(height: 4),
         const Text(
@@ -134,10 +176,14 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 /// Champ téléphone avec préfixe +237.
 class _PhoneField extends StatelessWidget {
   final TextEditingController controller;
-  const _PhoneField({required this.controller});
+  final String? error;
+  final ValueChanged<String>? onChanged;
+  const _PhoneField({required this.controller, this.error, this.onChanged});
 
   @override
   Widget build(BuildContext context) {
+    final hasError = error != null;
+    final borderColor = hasError ? AppColors.danger : AppColors.borderStrong;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -156,8 +202,7 @@ class _PhoneField extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
                 color: AppColors.bg,
-                border: Border.all(
-                    color: AppColors.borderStrong, width: 1.5),
+                border: Border.all(color: borderColor, width: 1.5),
                 borderRadius: BorderRadius.circular(AppRadii.md),
               ),
               alignment: Alignment.center,
@@ -177,6 +222,7 @@ class _PhoneField extends StatelessWidget {
                 keyboardType: TextInputType.phone,
                 textInputAction: TextInputAction.next,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                onChanged: onChanged,
                 style: const TextStyle(fontSize: 16, color: AppColors.text),
                 decoration: InputDecoration(
                   hintText: '6 74 70 20 37',
@@ -185,13 +231,13 @@ class _PhoneField extends StatelessWidget {
                       horizontal: 14, vertical: 14),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadii.md),
-                    borderSide: const BorderSide(
-                        color: AppColors.borderStrong, width: 1.5),
+                    borderSide: BorderSide(color: borderColor, width: 1.5),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadii.md),
-                    borderSide:
-                        const BorderSide(color: AppColors.ink, width: 1.5),
+                    borderSide: BorderSide(
+                        color: hasError ? AppColors.danger : AppColors.ink,
+                        width: 1.5),
                   ),
                   filled: true,
                   fillColor: AppColors.surface,
@@ -200,6 +246,11 @@ class _PhoneField extends StatelessWidget {
             ),
           ],
         ),
+        if (hasError) ...[
+          const SizedBox(height: 6),
+          Text(error!,
+              style: const TextStyle(fontSize: 12, color: AppColors.danger)),
+        ],
       ],
     );
   }

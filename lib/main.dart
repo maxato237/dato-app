@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:isar/isar.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:dato/app.dart';
+import 'package:dato/data/local/isar_service.dart';
 
 // Fournir ces valeurs via --dart-define lors du lancement :
 //   flutter run --dart-define=SUPABASE_URL=https://xxx.supabase.co \
@@ -19,16 +21,34 @@ Future<void> main() async {
     await Supabase.initialize(url: _kSupabaseUrl, publishableKey: _kSupabaseKey);
   }
 
-  // Étend l'app derrière la barre système Android (edge-to-edge)
+  // Persistance locale durable (offline-first). En cas d'échec d'ouverture
+  // (ex. plateforme sans binaire natif), on reste fonctionnel en mémoire.
+  Isar? isar;
+  try {
+    isar = await openAppIsar();
+  } catch (_) {
+    isar = null;
+  }
+
+  // Étend l'app derrière la barre système Android (edge-to-edge).
+  // Icônes système en sombre pour rester visibles au-dessus de la barre de
+  // navigation blanche de l'app (sinon elles se confondent avec elle).
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    statusBarIconBrightness: Brightness.dark,
+    statusBarBrightness: Brightness.light,
     systemNavigationBarColor: Colors.transparent,
     systemNavigationBarDividerColor: Colors.transparent,
+    systemNavigationBarIconBrightness: Brightness.dark,
   ));
 
   runApp(
-    const ProviderScope(
-      child: DatoApp(),
+    ProviderScope(
+      overrides: [
+        if (isar != null) isarProvider.overrideWithValue(isar),
+      ],
+      child: const DatoApp(),
     ),
   );
 }

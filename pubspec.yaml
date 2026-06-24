@@ -23,7 +23,6 @@ dependencies:
   # éviter le téléchargement réseau bloquant au démarrage + la chaîne native
   # path_provider → jni → jni_flutter qu'il tirait.
   flutter_svg: ^2.0.10+1
-  skeletonizer: ^1.4.2
 
   # --- Données ---
   intl: ^0.20.0
@@ -41,8 +40,13 @@ dependencies:
   dio: ^5.5.0
   flutter_secure_storage: ^10.3.1
   image_picker: ^1.1.2
+  file_picker: ^8.0.0
+  # Détection hors-ligne pour la file de sync (Phase 6).
+  connectivity_plus: ^6.0.3
+  isar: 3.1.0+1
+  isar_flutter_libs: 3.1.0+1
+  path_provider: ^2.1.5
   # À réactiver au fur et à mesure que les features sont implémentées :
-  # connectivity_plus: ^6.0.3
   # image_cropper: ^12.0.0
 
 dev_dependencies:
@@ -57,6 +61,19 @@ dev_dependencies:
   # json_serializable: ^6.8.0
   golden_toolkit: ^0.15.0
   mocktail: ^1.0.4
+  isar_generator: 3.1.0+1
+  build_runner: ^2.4.13
+  flutter_launcher_icons: ^0.14.1
+
+# Icône & logo de l'application (générés via `dart run flutter_launcher_icons`).
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/dato_icon.png"
+  min_sdk_android: 21
+  remove_alpha_ios: true
+  adaptive_icon_background: "#1B4965"
+  adaptive_icon_foreground: "assets/icons/dato_foreground.png"
 
 flutter:
   uses-material-design: true

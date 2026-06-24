@@ -1,5 +1,5 @@
 /// En-tête entreprise (modifiable dans Réglages).
-/// L'éditeur et l'aperçu l'affichent en haut/bas du document de devis.
+/// L'éditeur et l'aperçu l'affichent en haut du document de devis.
 class Company {
   final String id;
   final String name;
@@ -12,14 +12,24 @@ class Company {
   /// URL du logo (uploadé via le backend). Vide ⇒ pas de logo affiché.
   final String logoUrl;
 
-  /// URL de l'image de couverture affichée en haut du devis (bannière).
-  final String headerImageUrl;
-
-  /// URL de la bannière de pied de page (ex. texture « Situé à … »).
-  final String footerImageUrl;
-
-  /// Texte de localisation affiché dans la bannière de pied de page.
+  /// Texte de localisation affiché dans le pied de page du devis.
   final String location;
+
+  /// URL du modèle Word (.docx) utilisé pour générer les PDF de devis.
+  /// Quand défini, le backend utilise ce template (en-tête/pied de page Word
+  /// préservés) au lieu du rendu ReportLab.
+  final String templateDocxUrl;
+
+  /// Étiquettes des blocs de signature (bas du devis).
+  final String signatureLeft;
+  final String signatureRight;
+
+  /// Préfixe du numéro de devis (ex. "DV" → "DV-2026-001").
+  final String quotePrefix;
+
+  /// Quand `true`, le numéro de devis devient « PRÉFIXE-OBJET » : l'objet du
+  /// devis remplace la partie année-séquence, juste après le préfixe.
+  final bool quoteNumberByObject;
 
   const Company({
     required this.id,
@@ -30,19 +40,20 @@ class Company {
     this.city = '',
     this.currency = 'FCFA',
     this.logoUrl = '',
-    this.headerImageUrl = '',
-    this.footerImageUrl = '',
     this.location = '',
+    this.templateDocxUrl = '',
+    this.signatureLeft = '',
+    this.signatureRight = '',
+    this.quotePrefix = 'DV',
+    this.quoteNumberByObject = false,
   });
 
-  /// Initiale affichée dans le logo carré (fallback historique, plus utilisé
-  /// pour le rendu document mais conservé pour d'éventuels usages).
+  /// Initiale affichée dans le logo carré (fallback quand pas de logo).
   String get initial => name.trim().isEmpty ? '?' : name.trim()[0].toUpperCase();
 
   bool get hasLogo => logoUrl.trim().isNotEmpty;
-  bool get hasHeaderImage => headerImageUrl.trim().isNotEmpty;
-  bool get hasFooterImage => footerImageUrl.trim().isNotEmpty;
   bool get hasLocation => location.trim().isNotEmpty;
+  bool get hasTemplate => templateDocxUrl.trim().isNotEmpty;
 
   Company copyWith({
     String? name,
@@ -52,9 +63,12 @@ class Company {
     String? city,
     String? currency,
     String? logoUrl,
-    String? headerImageUrl,
-    String? footerImageUrl,
     String? location,
+    String? templateDocxUrl,
+    String? signatureLeft,
+    String? signatureRight,
+    String? quotePrefix,
+    bool? quoteNumberByObject,
   }) =>
       Company(
         id: id,
@@ -65,9 +79,12 @@ class Company {
         city: city ?? this.city,
         currency: currency ?? this.currency,
         logoUrl: logoUrl ?? this.logoUrl,
-        headerImageUrl: headerImageUrl ?? this.headerImageUrl,
-        footerImageUrl: footerImageUrl ?? this.footerImageUrl,
         location: location ?? this.location,
+        templateDocxUrl: templateDocxUrl ?? this.templateDocxUrl,
+        signatureLeft: signatureLeft ?? this.signatureLeft,
+        signatureRight: signatureRight ?? this.signatureRight,
+        quotePrefix: quotePrefix ?? this.quotePrefix,
+        quoteNumberByObject: quoteNumberByObject ?? this.quoteNumberByObject,
       );
 
   /// Construit une [Company] depuis la réponse JSON du backend Flask.
@@ -86,9 +103,12 @@ class Company {
       city: json['city']?.toString() ?? '',
       currency: json['currency']?.toString() ?? 'FCFA',
       logoUrl: json['logo_url']?.toString() ?? '',
-      headerImageUrl: json['header_image_url']?.toString() ?? '',
-      footerImageUrl: json['footer_image_url']?.toString() ?? '',
       location: json['location']?.toString() ?? '',
+      templateDocxUrl: json['template_docx_url']?.toString() ?? '',
+      signatureLeft: json['signature_left']?.toString() ?? '',
+      signatureRight: json['signature_right']?.toString() ?? '',
+      quotePrefix: json['quote_prefix']?.toString() ?? 'DV',
+      quoteNumberByObject: json['quote_number_by_object'] == true,
     );
   }
 
@@ -105,8 +125,11 @@ class Company {
             .toList(),
         'currency': currency,
         'logo_url': logoUrl,
-        'header_image_url': headerImageUrl,
-        'footer_image_url': footerImageUrl,
         'location': location,
+        'template_docx_url': templateDocxUrl,
+        'signature_left': signatureLeft,
+        'signature_right': signatureRight,
+        'quote_prefix': quotePrefix,
+        'quote_number_by_object': quoteNumberByObject,
       };
 }

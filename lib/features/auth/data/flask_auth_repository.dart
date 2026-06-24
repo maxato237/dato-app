@@ -18,6 +18,7 @@ class FlaskAuthRepository implements AuthRepository {
   final ApiClient _client;
 
   final _authCtrl = StreamController<AuthStatus>.broadcast();
+  final _sessionExpiredCtrl = StreamController<void>.broadcast();
   AuthStatus _currentStatus = AuthStatus.loading;
 
   String? _pendingPhone;
@@ -26,8 +27,9 @@ class FlaskAuthRepository implements AuthRepository {
   FlaskAuthRepository({required TokenStorage storage, required ApiClient client})
       : _storage = storage,
         _client = client {
-    // Abonnement : session expirée côté ApiClient → on émet unauthenticated.
+    // Token non renouvelable → session expirée (pas un logout volontaire).
     _client.sessionExpiredStream.listen((_) {
+      _sessionExpiredCtrl.add(null);
       _currentStatus = AuthStatus.unauthenticated;
       _authCtrl.add(_currentStatus);
     });
@@ -50,6 +52,9 @@ class FlaskAuthRepository implements AuthRepository {
   Stream<AuthStatus> get authStateChanges => _authCtrl.stream;
 
   @override
+  Stream<void> get sessionExpiredEvents => _sessionExpiredCtrl.stream;
+
+  @override
   String? get pendingPhone => _pendingPhone;
 
   @override
@@ -64,13 +69,20 @@ class FlaskAuthRepository implements AuthRepository {
   }) async {
     _pendingPhone = phone;
     _isResetFlow = false;
-    await _client.post('/api/auth/register', body: {
+    final resp = await _client.post('/api/auth/register', body: {
       'phone': phone,
       'name': name,
       'password': password,
       if (email != null && email.isNotEmpty) 'email': email,
     }, auth: false);
-    // Pas de token ici — l'utilisateur doit vérifier son OTP d'abord.
+    // Si le backend a retourné des tokens (REQUIRE_OTP=false), on est déjà
+    // authentifié — pas besoin de passer par l'écran OTP.
+    final data = resp['data'] as Map<String, dynamic>?;
+    if (data != null && data.containsKey('access_token')) {
+      await _storeTokens(data);
+      _currentStatus = AuthStatus.authenticated;
+      _authCtrl.add(_currentStatus);
+    }
   }
 
   @override
@@ -157,5 +169,6 @@ class FlaskAuthRepository implements AuthRepository {
 
   void dispose() {
     _authCtrl.close();
+    _sessionExpiredCtrl.close();
   }
 }
