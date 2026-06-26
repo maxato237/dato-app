@@ -89,7 +89,7 @@ class TotalCard extends StatelessWidget {
                   text: 'Arrêté le présent devis à la somme de ',
                   children: [
                     TextSpan(
-                      text: montantEnLettres(total),
+                      text: montantEnLettres(total).toUpperCase(),
                       style: const TextStyle(fontWeight: FontWeight.w700),
                     ),
                     const TextSpan(text: '.'),

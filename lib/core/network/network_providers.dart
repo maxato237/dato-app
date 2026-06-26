@@ -13,7 +13,7 @@ import 'token_storage.dart';
 // (DHCP), relancer avec --dart-define=API_BASE_URL=http://<nouvelle-IP>:5000.
 const kApiBaseUrl = String.fromEnvironment(
   'API_BASE_URL',
-  defaultValue: 'http://10.90.203.197:5000',
+  defaultValue: 'http://192.168.1.128:5000',
 );
 
 final tokenStorageProvider = Provider<TokenStorage>(

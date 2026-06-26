@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
-import 'package:dato/core/network/api_exception.dart';
 import 'package:dato/core/network/network_providers.dart';
 import 'package:dato/core/router/routes.dart';
 import 'package:dato/core/theme/app_theme.dart';
@@ -204,10 +203,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
       setState(() => _templateDocxUrl = url);
       ref.read(currentCompanyProvider.notifier).update(_buildCompany());
       _toast('Modèle Word importé avec succès.');
-    } on ApiException catch (e) {
-      _toast(e.message);
     } catch (_) {
-      _toast("Échec de l'import du modèle Word.");
+      // Stockage distant indisponible (réseau / Supabase) : on conserve le
+      // fichier en attente et on réessaiera automatiquement plus tard.
+      if (!mounted) return;
+      ref.read(currentCompanyProvider.notifier).queuePendingTemplate(path);
+      _toast('Modèle enregistré — envoi dès que le stockage sera disponible.');
     } finally {
       if (mounted) setState(() => _uploadingTemplate = false);
     }
@@ -259,6 +260,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     final onCompteTab = _tab.index == 3;
     return Scaffold(
       backgroundColor: AppColors.bg,
+      // On gère nous-mêmes l'inset clavier via le padding de `_scrollPad`
+      // (sinon double décompte = grand bloc blanc impossible à scroller).
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: const Text('Réglages'),
         bottom: TabBar(
@@ -768,15 +772,18 @@ class _NumberPreview extends StatelessWidget {
         children: [
           const Icon(Icons.tag, size: 18, color: AppColors.ink),
           const SizedBox(width: 10),
-          Text(
-            example,
-            style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: AppColors.ink,
-                letterSpacing: 0.5),
+          Expanded(
+            child: Text(
+              example,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.ink,
+                  letterSpacing: 0.5),
+            ),
           ),
-          const Spacer(),
+          const SizedBox(width: 10),
           const Text('prochain devis',
               style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
         ],

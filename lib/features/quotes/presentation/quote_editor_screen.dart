@@ -91,6 +91,7 @@ class _QuoteEditorScreenState extends ConsumerState<QuoteEditorScreen> {
                             sectionIndex: i,
                             articles: articles,
                             controller: _controller,
+                            showSubtotal: quote.sections.length > 1,
                           ),
                         );
                       },
@@ -485,12 +486,22 @@ class _QuoteEditorScreenState extends ConsumerState<QuoteEditorScreen> {
   // Barre d'action
   // ---------------------------------------------------------------------------
   Widget _actionBar(BuildContext context) {
+    // Réserve l'inset de la barre système Android (même logique que la
+    // bottom-nav) pour que « Aperçu » / « Partager » ne soient pas masqués.
+    final bottomInset = MediaQuery.of(context).padding.bottom;
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.surface,
         border: Border(top: BorderSide(color: AppColors.border)),
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x0F101828),
+            blurRadius: 16,
+            offset: Offset(0, -4),
+          ),
+        ],
       ),
-      padding: const EdgeInsets.fromLTRB(14, 10, 14, 14),
+      padding: EdgeInsets.fromLTRB(14, 10, 14, 14 + bottomInset),
       child: Row(
         children: [
           Expanded(

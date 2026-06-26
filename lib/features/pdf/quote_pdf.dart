@@ -119,7 +119,7 @@ Future<Uint8List> buildQuotePdf({
                 const pw.TextSpan(
                     text: 'Arrêté le présent devis à la somme de '),
                 pw.TextSpan(
-                  text: montantEnLettres(total),
+                  text: montantEnLettres(total).toUpperCase(),
                   style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
                 ),
                 const pw.TextSpan(text: '.'),
@@ -253,10 +253,13 @@ List<pw.Widget> _tableRows(Quote quote, double total) {
             flex: _ptFlex, align: pw.TextAlign.right, rightBorder: false),
       ]));
     }
-    final label = RegExp('total', caseSensitive: false).hasMatch(sec.title)
-        ? sec.title.toUpperCase()
-        : 'Total ${sec.title}'.toUpperCase();
-    rows.add(_spanRow(label, formatMoney(sec.total), bg: _subBg));
+    // Sous-total de section : uniquement s'il y a au moins deux sections.
+    if (quote.sections.length > 1) {
+      final label = RegExp('total', caseSensitive: false).hasMatch(sec.title)
+          ? sec.title.toUpperCase()
+          : 'Total ${sec.title}'.toUpperCase();
+      rows.add(_spanRow(label, formatMoney(sec.total), bg: _subBg));
+    }
   }
 
   for (final rub in quote.rubriques) {
@@ -351,7 +354,12 @@ pw.Widget _row({
     ),
     // Pas de `stretch` ici : le paquet `pdf` n'a pas d'IntrinsicHeight, et
     // étirer sur une hauteur non bornée fait s'effondrer le tableau.
-    child: pw.Row(children: cells),
+    // `center` centre le texte verticalement quand une cellule (ex. une
+    // désignation longue) passe sur deux lignes.
+    child: pw.Row(
+      crossAxisAlignment: pw.CrossAxisAlignment.center,
+      children: cells,
+    ),
   );
 }
 

@@ -107,7 +107,7 @@ class QuoteDocument extends StatelessWidget {
               text: 'Arrêté le présent devis à la somme de ',
               children: [
                 TextSpan(
-                  text: montantEnLettres(total),
+                  text: montantEnLettres(total).toUpperCase(),
                   style: const TextStyle(fontWeight: FontWeight.w700),
                 ),
                 const TextSpan(text: '.'),
@@ -263,11 +263,14 @@ class QuoteDocument extends StatelessWidget {
       for (final l in sec.lines) {
         rows.add(_lineRow(l));
       }
-      final label = RegExp('total', caseSensitive: false).hasMatch(sec.title)
-          ? sec.title.toUpperCase()
-          : 'Total ${sec.title}'.toUpperCase();
-      rows.add(_spanRow(label, formatMoney(sec.total),
-          bg: _subBg, bold: true));
+      // Sous-total de section : uniquement s'il y a au moins deux sections.
+      if (quote.sections.length > 1) {
+        final label = RegExp('total', caseSensitive: false).hasMatch(sec.title)
+            ? sec.title.toUpperCase()
+            : 'Total ${sec.title}'.toUpperCase();
+        rows.add(_spanRow(label, formatMoney(sec.total),
+            bg: _subBg, bold: true));
+      }
     }
 
     for (final rub in quote.rubriques) {
@@ -409,9 +412,17 @@ class QuoteDocument extends StatelessWidget {
     Color? fg,
     bool rightBorder = true,
   }) {
+    // Centrage vertical du texte dans la hauteur de la cellule (les cellules
+    // sont étirées à la hauteur de ligne par IntrinsicHeight + stretch).
+    final cellAlign = align == TextAlign.center
+        ? Alignment.center
+        : align == TextAlign.right
+            ? Alignment.centerRight
+            : Alignment.centerLeft;
     return Expanded(
       flex: flex,
       child: Container(
+        alignment: cellAlign,
         decoration: BoxDecoration(
           color: head && bg == null ? _headBg : bg,
           border: rightBorder

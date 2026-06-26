@@ -12,6 +12,7 @@ import 'package:dato/core/utils/formatters.dart';
 import 'package:dato/core/widgets/dato_bottom_sheet.dart';
 import 'package:dato/core/widgets/dato_button.dart';
 import 'package:dato/core/widgets/dato_toast.dart';
+import 'package:dato/features/library/providers/articles_provider.dart';
 import 'package:dato/features/pdf/template_pdf.dart';
 import 'package:dato/features/quotes/domain/quote.dart';
 import 'package:dato/features/settings/domain/company.dart';
@@ -101,6 +102,52 @@ class ShareSheetContent extends ConsumerWidget {
     );
   }
 
+  /// Enregistre dans la bibliothèque les désignations du devis qui n'y figurent
+  /// pas encore. Appelé **uniquement** sur une action concrète (partage, copie,
+  /// téléchargement, e-mail) pour ne pas polluer la bibliothèque avec des
+  /// saisies en cours / brouillons.
+  void _persistArticles(WidgetRef ref) {
+    final notifier = ref.read(articlesNotifierProvider.notifier);
+    for (final section in quote.sections) {
+      for (final line in section.lines) {
+        if (line.designation.trim().isNotEmpty) {
+          notifier.ensure(line.designation, line.pu.round());
+        }
+      }
+    }
+  }
+
+  /// Modal d'information avant un partage par **lien** (WhatsApp, e-mail) :
+  /// rappelle que seul le lien de l'aperçu en ligne est envoyé et recommande
+  /// le PDF si l'utilisateur veut transmettre le document lui-même.
+  Future<bool> _confirmLinkShare(BuildContext context, String canal) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Partage du lien du devis'),
+        content: Text(
+          'Ce partage envoie uniquement le lien de l\'aperçu du devis sur '
+          'internet ($canal). Votre client devra télécharger lui-même le '
+          'devis depuis ce lien.\n\n'
+          'Si ce n\'est pas ce que vous souhaitez, nous vous recommandons '
+          'd\'annuler et de plutôt « Télécharger le PDF » puis de l\'envoyer '
+          'directement à votre client.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Annuler'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Continuer'),
+          ),
+        ],
+      ),
+    );
+    return ok ?? false;
+  }
+
   /// Lien public partageable. Active le lien côté backend et renvoie son URL ;
   /// repli local si le devis n'est pas encore synchronisé (hors-ligne).
   Future<String> _resolvePublicUrl(WidgetRef ref) async {
@@ -116,6 +163,9 @@ class ShareSheetContent extends ConsumerWidget {
       'Montant : ${formatFcfa(quote.grandTotal)}\n$link';
 
   Future<void> _whatsapp(BuildContext context, WidgetRef ref) async {
+    if (!await _confirmLinkShare(context, 'WhatsApp')) return;
+    if (!context.mounted) return;
+    _persistArticles(ref);
     Navigator.of(context).pop();
     final text = _shareText(await _resolvePublicUrl(ref));
     final uri = Uri.parse('whatsapp://send?text=${Uri.encodeComponent(text)}');
@@ -131,6 +181,7 @@ class ShareSheetContent extends ConsumerWidget {
   }
 
   Future<void> _copyLink(BuildContext context, WidgetRef ref) async {
+    _persistArticles(ref);
     final ctx = Navigator.of(context, rootNavigator: true).context;
     Navigator.of(context).pop();
     final link = await _resolvePublicUrl(ref);
@@ -142,6 +193,7 @@ class ShareSheetContent extends ConsumerWidget {
   }
 
   Future<void> _downloadPdf(BuildContext context, WidgetRef ref) async {
+    _persistArticles(ref);
     final api = ref.read(apiClientProvider);
     final rootNav = Navigator.of(context, rootNavigator: true);
     final ctx = rootNav.context;
@@ -172,6 +224,9 @@ class ShareSheetContent extends ConsumerWidget {
   }
 
   Future<void> _email(BuildContext context, WidgetRef ref) async {
+    if (!await _confirmLinkShare(context, 'e-mail')) return;
+    if (!context.mounted) return;
+    _persistArticles(ref);
     final ctx = Navigator.of(context, rootNavigator: true).context;
     Navigator.of(context).pop();
     final subject = 'Devis ${quote.number} — ${company.name}';

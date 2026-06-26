@@ -6,9 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:dato/core/router/routes.dart';
 
-/// Écran de démarrage DATO (reprend la maquette HTML du splash) : logo sur fond
-/// dégradé bleu nuit, accroche, titre, description et points de chargement.
-///
+/// Écran de démarrage DATO 
 /// Après [_kSplashDuration], navigue vers l'accueil ; le router redirige
 /// ensuite vers la connexion ou le tableau de bord selon la session.
 class SplashScreen extends StatefulWidget {
@@ -18,7 +16,7 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-const _kSplashDuration = Duration(milliseconds: 2600);
+const _kSplashDuration = Duration(milliseconds: 3500);
 
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {

@@ -52,11 +52,19 @@ class CompanyNotifier extends StateNotifier<Company> {
     onChanged?.call();
   }
 
+  /// Enregistre un modèle Word à uploader dès que le réseau / le stockage
+  /// distant redeviennent disponibles.
+  void queuePendingTemplate(String localPath) {
+    _writeModel(state, markDirty: true, pendingTemplatePath: localPath);
+    onChanged?.call();
+  }
+
   void _writeModel(
     Company company, {
     required bool markDirty,
     String? pendingLogoPath,
     String? logoUrlToDelete,
+    String? pendingTemplatePath,
   }) {
     final isar = _isar;
     if (isar == null) return;
@@ -67,7 +75,9 @@ class CompanyNotifier extends StateNotifier<Company> {
         ..pendingLogoPath =
             pendingLogoPath ?? existing?.pendingLogoPath ?? ''
         ..logoUrlToDelete =
-            logoUrlToDelete ?? existing?.logoUrlToDelete ?? '';
+            logoUrlToDelete ?? existing?.logoUrlToDelete ?? ''
+        ..pendingTemplatePath =
+            pendingTemplatePath ?? existing?.pendingTemplatePath ?? '';
       isar.companyModels.clearSync();
       isar.companyModels.putSync(model);
     });

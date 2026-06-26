@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dato/core/utils/id.dart';
 import 'package:dato/data/repositories/quote_repository.dart';
 import 'package:dato/features/library/domain/article.dart';
-import 'package:dato/features/library/providers/articles_provider.dart';
 import 'package:dato/features/quotes/domain/quote.dart';
 import 'package:dato/features/settings/providers/company_provider.dart';
 
@@ -67,23 +66,9 @@ class QuoteEditorController
     _debounce?.cancel();
     _debounce = Timer(kAutosaveDebounce, () async {
       await _repo.save(state.quote);
-      _autoSaveArticles(state.quote);
       if (_disposed) return;
       state = state.copyWith(saveStatus: SaveStatus.saved);
     });
-  }
-
-  /// Mémorise dans la bibliothèque les désignations saisies dans le devis qui
-  /// n'y figurent pas encore (auto-enregistrement des articles).
-  void _autoSaveArticles(Quote quote) {
-    final notifier = ref.read(articlesNotifierProvider.notifier);
-    for (final section in quote.sections) {
-      for (final line in section.lines) {
-        if (line.designation.trim().isNotEmpty) {
-          notifier.ensure(line.designation, line.pu.round());
-        }
-      }
-    }
   }
 
   Quote _withSections(List<Section> sections) =>
@@ -108,7 +93,10 @@ class QuoteEditorController
   void addSection() {
     final section = Section(
       id: newId(),
-      title: 'Nouvelle section',
+      title: '',
+      // La première section masque son titre par défaut (case décochée) ;
+      // les sections suivantes l'affichent comme en-tête de bloc.
+      showTitle: state.quote.sections.isNotEmpty,
       lines: [SectionLine(id: newId(), designation: '', qty: 1, pu: 0)],
     );
     _apply(_withSections([...state.quote.sections, section]));
@@ -172,7 +160,7 @@ class QuoteEditorController
   void addRubrique() {
     final rubrique = Rubrique(
       id: newId(),
-      label: 'Nouvelle rubrique',
+      label: '',
       lines: [RubriqueLine(id: newId(), mode: RubriqueMode.forfait, amount: 0)],
     );
     _apply(_withRubriques([...state.quote.rubriques, rubrique]));

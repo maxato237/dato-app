@@ -72,33 +72,38 @@ const CompanyModelSchema = CollectionSchema(
       name: r'pendingLogoPath',
       type: IsarType.string,
     ),
-    r'phones': PropertySchema(
+    r'pendingTemplatePath': PropertySchema(
       id: 11,
+      name: r'pendingTemplatePath',
+      type: IsarType.string,
+    ),
+    r'phones': PropertySchema(
+      id: 12,
       name: r'phones',
       type: IsarType.string,
     ),
     r'quoteNumberByObject': PropertySchema(
-      id: 12,
+      id: 13,
       name: r'quoteNumberByObject',
       type: IsarType.bool,
     ),
     r'quotePrefix': PropertySchema(
-      id: 13,
+      id: 14,
       name: r'quotePrefix',
       type: IsarType.string,
     ),
     r'signatureLeft': PropertySchema(
-      id: 14,
+      id: 15,
       name: r'signatureLeft',
       type: IsarType.string,
     ),
     r'signatureRight': PropertySchema(
-      id: 15,
+      id: 16,
       name: r'signatureRight',
       type: IsarType.string,
     ),
     r'templateDocxUrl': PropertySchema(
-      id: 16,
+      id: 17,
       name: r'templateDocxUrl',
       type: IsarType.string,
     )
@@ -147,6 +152,7 @@ int _companyModelEstimateSize(
   bytesCount += 3 + object.logoUrlToDelete.length * 3;
   bytesCount += 3 + object.name.length * 3;
   bytesCount += 3 + object.pendingLogoPath.length * 3;
+  bytesCount += 3 + object.pendingTemplatePath.length * 3;
   bytesCount += 3 + object.phones.length * 3;
   bytesCount += 3 + object.quotePrefix.length * 3;
   bytesCount += 3 + object.signatureLeft.length * 3;
@@ -172,12 +178,13 @@ void _companyModelSerialize(
   writer.writeString(offsets[8], object.logoUrlToDelete);
   writer.writeString(offsets[9], object.name);
   writer.writeString(offsets[10], object.pendingLogoPath);
-  writer.writeString(offsets[11], object.phones);
-  writer.writeBool(offsets[12], object.quoteNumberByObject);
-  writer.writeString(offsets[13], object.quotePrefix);
-  writer.writeString(offsets[14], object.signatureLeft);
-  writer.writeString(offsets[15], object.signatureRight);
-  writer.writeString(offsets[16], object.templateDocxUrl);
+  writer.writeString(offsets[11], object.pendingTemplatePath);
+  writer.writeString(offsets[12], object.phones);
+  writer.writeBool(offsets[13], object.quoteNumberByObject);
+  writer.writeString(offsets[14], object.quotePrefix);
+  writer.writeString(offsets[15], object.signatureLeft);
+  writer.writeString(offsets[16], object.signatureRight);
+  writer.writeString(offsets[17], object.templateDocxUrl);
 }
 
 CompanyModel _companyModelDeserialize(
@@ -199,12 +206,13 @@ CompanyModel _companyModelDeserialize(
   object.logoUrlToDelete = reader.readString(offsets[8]);
   object.name = reader.readString(offsets[9]);
   object.pendingLogoPath = reader.readString(offsets[10]);
-  object.phones = reader.readString(offsets[11]);
-  object.quoteNumberByObject = reader.readBool(offsets[12]);
-  object.quotePrefix = reader.readString(offsets[13]);
-  object.signatureLeft = reader.readString(offsets[14]);
-  object.signatureRight = reader.readString(offsets[15]);
-  object.templateDocxUrl = reader.readString(offsets[16]);
+  object.pendingTemplatePath = reader.readString(offsets[11]);
+  object.phones = reader.readString(offsets[12]);
+  object.quoteNumberByObject = reader.readBool(offsets[13]);
+  object.quotePrefix = reader.readString(offsets[14]);
+  object.signatureLeft = reader.readString(offsets[15]);
+  object.signatureRight = reader.readString(offsets[16]);
+  object.templateDocxUrl = reader.readString(offsets[17]);
   return object;
 }
 
@@ -240,14 +248,16 @@ P _companyModelDeserializeProp<P>(
     case 11:
       return (reader.readString(offset)) as P;
     case 12:
-      return (reader.readBool(offset)) as P;
-    case 13:
       return (reader.readString(offset)) as P;
+    case 13:
+      return (reader.readBool(offset)) as P;
     case 14:
       return (reader.readString(offset)) as P;
     case 15:
       return (reader.readString(offset)) as P;
     case 16:
+      return (reader.readString(offset)) as P;
+    case 17:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1871,6 +1881,142 @@ extension CompanyModelQueryFilter
     });
   }
 
+  QueryBuilder<CompanyModel, CompanyModel, QAfterFilterCondition>
+      pendingTemplatePathEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'pendingTemplatePath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<CompanyModel, CompanyModel, QAfterFilterCondition>
+      pendingTemplatePathGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'pendingTemplatePath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<CompanyModel, CompanyModel, QAfterFilterCondition>
+      pendingTemplatePathLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'pendingTemplatePath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<CompanyModel, CompanyModel, QAfterFilterCondition>
+      pendingTemplatePathBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'pendingTemplatePath',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<CompanyModel, CompanyModel, QAfterFilterCondition>
+      pendingTemplatePathStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'pendingTemplatePath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<CompanyModel, CompanyModel, QAfterFilterCondition>
+      pendingTemplatePathEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'pendingTemplatePath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<CompanyModel, CompanyModel, QAfterFilterCondition>
+      pendingTemplatePathContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'pendingTemplatePath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<CompanyModel, CompanyModel, QAfterFilterCondition>
+      pendingTemplatePathMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'pendingTemplatePath',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<CompanyModel, CompanyModel, QAfterFilterCondition>
+      pendingTemplatePathIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'pendingTemplatePath',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<CompanyModel, CompanyModel, QAfterFilterCondition>
+      pendingTemplatePathIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'pendingTemplatePath',
+        value: '',
+      ));
+    });
+  }
+
   QueryBuilder<CompanyModel, CompanyModel, QAfterFilterCondition> phonesEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -2705,6 +2851,20 @@ extension CompanyModelQuerySortBy
     });
   }
 
+  QueryBuilder<CompanyModel, CompanyModel, QAfterSortBy>
+      sortByPendingTemplatePath() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'pendingTemplatePath', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CompanyModel, CompanyModel, QAfterSortBy>
+      sortByPendingTemplatePathDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'pendingTemplatePath', Sort.desc);
+    });
+  }
+
   QueryBuilder<CompanyModel, CompanyModel, QAfterSortBy> sortByPhones() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'phones', Sort.asc);
@@ -2936,6 +3096,20 @@ extension CompanyModelQuerySortThenBy
     });
   }
 
+  QueryBuilder<CompanyModel, CompanyModel, QAfterSortBy>
+      thenByPendingTemplatePath() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'pendingTemplatePath', Sort.asc);
+    });
+  }
+
+  QueryBuilder<CompanyModel, CompanyModel, QAfterSortBy>
+      thenByPendingTemplatePathDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'pendingTemplatePath', Sort.desc);
+    });
+  }
+
   QueryBuilder<CompanyModel, CompanyModel, QAfterSortBy> thenByPhones() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'phones', Sort.asc);
@@ -3097,6 +3271,14 @@ extension CompanyModelQueryWhereDistinct
     });
   }
 
+  QueryBuilder<CompanyModel, CompanyModel, QDistinct>
+      distinctByPendingTemplatePath({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'pendingTemplatePath',
+          caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<CompanyModel, CompanyModel, QDistinct> distinctByPhones(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -3216,6 +3398,13 @@ extension CompanyModelQueryProperty
       pendingLogoPathProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'pendingLogoPath');
+    });
+  }
+
+  QueryBuilder<CompanyModel, String, QQueryOperations>
+      pendingTemplatePathProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'pendingTemplatePath');
     });
   }
 

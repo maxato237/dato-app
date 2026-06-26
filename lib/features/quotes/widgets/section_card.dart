@@ -17,12 +17,17 @@ class SectionCard extends StatelessWidget {
     required this.sectionIndex,
     required this.articles,
     required this.controller,
+    this.showSubtotal = true,
   });
 
   final Section section;
   final int sectionIndex;
   final List<Article> articles;
   final QuoteEditorController controller;
+
+  /// Affiche le sous-total de la section : uniquement utile dès qu'il y a
+  /// au moins deux sections (sinon le total général suffit).
+  final bool showSubtotal;
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +68,7 @@ class SectionCard extends StatelessWidget {
                 Expanded(
                   child: InlineTextField(
                     value: section.title,
-                    hint: 'Titre de la section',
+                    hint: 'Nom de la section',
                     style: headStyle,
                     onChanged: (v) =>
                         controller.setSectionTitle(section.id, v),
@@ -164,32 +169,34 @@ class SectionCard extends StatelessWidget {
             ),
           ),
 
-          // Sous-total
-          Container(
-            color: AppColors.ink050,
-            padding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Flexible(
-                  child: Text(
-                    'Total ${section.title.isEmpty ? 'section' : section.title}',
-                    style: headStyle.copyWith(fontSize: 13, color: AppColors.ink),
-                    overflow: TextOverflow.ellipsis,
+          // Sous-total (affiché seulement à partir de la 2e section)
+          if (showSubtotal)
+            Container(
+              color: AppColors.ink050,
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    child: Text(
+                      'Total ${section.title.isEmpty ? 'section' : section.title}',
+                      style:
+                          headStyle.copyWith(fontSize: 13, color: AppColors.ink),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                ),
-                Text(
-                  formatFcfa(section.total),
-                  style: headStyle.copyWith(
-                    fontSize: 14,
-                    color: AppColors.ink,
-                    fontFeatures: const [FontFeature.tabularFigures()],
+                  Text(
+                    formatFcfa(section.total),
+                    style: headStyle.copyWith(
+                      fontSize: 14,
+                      color: AppColors.ink,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );

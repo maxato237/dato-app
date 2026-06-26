@@ -1,6 +1,6 @@
 <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
   <rect width="512" height="512" fill="#1B4965"/>
-  <g transform="translate(106 106) scale(3.0)">
+  <g transform="translate(28.9 42.9) scale(4.02)">
     <!-- D blanc (contre-poinçon évidé) -->
     <path fill-rule="evenodd" clip-rule="evenodd"
       d="M22 18 H52 C75 18 89 31 89 50 C89 69 75 82 52 82 H22 V18 Z

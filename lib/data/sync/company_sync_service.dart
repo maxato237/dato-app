@@ -76,6 +76,23 @@ class CompanySyncService {
         }
       }
 
+      // 1bis. Modèle Word capturé hors-ligne : upload puis MAJ de l'URL.
+      if (model.pendingTemplatePath.isNotEmpty) {
+        try {
+          final newUrl = await _api.uploadTemplate(model.pendingTemplatePath);
+          model = isar.companyModels.where().findFirstSync();
+          if (model == null) return;
+          await isar.writeTxn(() async {
+            model!
+              ..templateDocxUrl = newUrl
+              ..pendingTemplatePath = '';
+            await isar.companyModels.put(model);
+          });
+        } catch (_) {
+          return; // stockage encore indisponible : on réessaiera.
+        }
+      }
+
       // 2. Pousser l'entreprise.
       final company = companyToDomain(model);
       try {
@@ -93,7 +110,9 @@ class CompanySyncService {
 
       // 3. Marquer synchronisé.
       final fresh = isar.companyModels.where().findFirstSync();
-      if (fresh != null && fresh.pendingLogoPath.isEmpty) {
+      if (fresh != null &&
+          fresh.pendingLogoPath.isEmpty &&
+          fresh.pendingTemplatePath.isEmpty) {
         await isar.writeTxn(() async {
           fresh.dirty = false;
           await isar.companyModels.put(fresh);

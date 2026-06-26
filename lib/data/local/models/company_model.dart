@@ -34,4 +34,7 @@ class CompanyModel {
 
   /// Ancienne URL de logo à supprimer côté Cloudinary après remplacement réussi.
   String logoUrlToDelete = '';
+
+  /// Chemin local d'un modèle Word en attente d'upload. Vide sinon.
+  String pendingTemplatePath = '';
 }

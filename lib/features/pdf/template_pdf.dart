@@ -40,15 +40,18 @@ List<Map<String, dynamic>> buildTemplateRows(Quote quote) {
         'pt': formatMoney(l.pt),
       });
     }
-    final label = RegExp('total', caseSensitive: false).hasMatch(sec.title)
-        ? sec.title.toUpperCase()
-        : 'Total ${sec.title}'.toUpperCase();
-    rows.add({
-      'kind': 'span',
-      'label': label,
-      'amount': formatMoney(sec.total),
-      'bold': true,
-    });
+    // Sous-total de section : uniquement s'il y a au moins deux sections.
+    if (quote.sections.length > 1) {
+      final label = RegExp('total', caseSensitive: false).hasMatch(sec.title)
+          ? sec.title.toUpperCase()
+          : 'Total ${sec.title}'.toUpperCase();
+      rows.add({
+        'kind': 'span',
+        'label': label,
+        'amount': formatMoney(sec.total),
+        'bold': true,
+      });
+    }
   }
 
   // ── Rubriques (forfait / formule) ───────────────────────────────────────────
@@ -116,7 +119,7 @@ Map<String, dynamic> templatePdfPayload(Quote quote, Company company) {
         'Devis estimatif quantitatif pour ${quote.object}'.toUpperCase(),
     'client': quote.client,
     'rows': buildTemplateRows(quote),
-    'amountInWords': montantEnLettres(quote.grandTotal),
+    'amountInWords': montantEnLettres(quote.grandTotal).toUpperCase(),
     'note': quote.note ?? '',
     'signatures': quote.signatures.map((s) => s.label).toList(),
   };
