@@ -5,15 +5,14 @@ import 'token_storage.dart';
 
 // URL de base UNIQUE du backend (API REST + health). Configurée via
 // --dart-define à l'exécution :
-//   Appareil réel (défaut) : IP LAN du PC, ex. http://192.168.1.128:5000
-//   Émulateur Android      : --dart-define=API_BASE_URL=http://10.0.2.2:5000
-//   Simulateur iOS         : --dart-define=API_BASE_URL=http://localhost:5000
-// Défaut = IP LAN du PC car la cible de dev ici est un TÉLÉPHONE PHYSIQUE sur
-// le même WiFi (10.0.2.2 ne marche QUE sur l'émulateur). Si l'IP du PC change
-// (DHCP), relancer avec --dart-define=API_BASE_URL=http://<nouvelle-IP>:5000.
+//   Déploiement : --dart-define=API_BASE_URL=https://dato-backend-00h1q.sevalla.app
+//   Développement local : --dart-define=API_BASE_URL=http://localhost:5000
+//   Appareil réel (si backend local) : --dart-define=API_BASE_URL=http://<ip-pc>:5000
+// Les valeurs par défaut ci-dessous sont utilisées si aucune variable d'environnement
+// n'est fournie au moment du build/exécution.
 const kApiBaseUrl = String.fromEnvironment(
   'API_BASE_URL',
-  defaultValue: 'http://192.168.1.128:5000',
+  defaultValue: 'https://dato-backend-00h1q.sevalla.app',
 );
 
 final tokenStorageProvider = Provider<TokenStorage>(
