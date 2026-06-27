@@ -18,7 +18,7 @@ void main() {
       final read = repo.getById('fix');
       expect(read, isNotNull);
       expect(read!.id, q.id);
-      expect(read.client, 'Lycée Bilingue de Yaoundé');
+      expect(read.client, 'Client Démo');
       expect(read.grandTotal, q.grandTotal);
       expect(read.sections.first.lines.length, 3);
     });

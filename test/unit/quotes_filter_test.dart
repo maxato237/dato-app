@@ -26,9 +26,9 @@ Quote _q(String id, String object, String client, QuoteStatus status,
 
 void main() {
   final quotes = [
-    _q('1', 'Fabrication de chaises', 'Lycée Bilingue', QuoteStatus.sent),
-    _q('2', 'Fourniture de madriers', 'Coopérative', QuoteStatus.accepted),
-    _q('3', 'Placards sur mesure', 'Mme Atangana', QuoteStatus.accepted),
+    _q('1', 'Fabrication de chaises', 'Client Alpha', QuoteStatus.sent),
+    _q('2', 'Fourniture de madriers', 'Client Beta', QuoteStatus.accepted),
+    _q('3', 'Placards sur mesure', 'Client Gamma', QuoteStatus.accepted),
   ];
 
   group('filterQuotes', () {
@@ -49,7 +49,7 @@ void main() {
     });
 
     test('recherche sur le client', () {
-      final r = filterQuotes(quotes, const QuotesFilter(search: 'atangana'));
+      final r = filterQuotes(quotes, const QuotesFilter(search: 'gamma'));
       expect(r.single.id, '3');
     });
 

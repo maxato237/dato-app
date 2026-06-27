@@ -86,7 +86,7 @@ void main() {
     expect(find.text('OTP'), findsOneWidget);
 
     // 3. Simuler la vérification OTP réussie → onboarding step 1
-    await fakeRepo.verifyOtp(phone: '+237674702037', token: '000000');
+    await fakeRepo.verifyOtp(phone: '+237600000000', token: '000000');
     router.go(Routes.onboarding1);
     await tester.pump();
     expect(find.text('Étape 1'), findsOneWidget);

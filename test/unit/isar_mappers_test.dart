@@ -41,7 +41,7 @@ void main() {
         city: 'Yaoundé',
         currency: 'FCFA',
         logoUrl: 'http://h/logo.png',
-        location: 'Nkolfoulou',
+        location: 'Quartier Démo',
         templateDocxUrl: 'http://h/t.docx',
       );
       final back = companyToDomain(companyToModel(c));

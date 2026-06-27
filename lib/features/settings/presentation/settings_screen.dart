@@ -309,7 +309,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                       key: const Key('settings_name'),
                       controller: _nameCtrl,
                       label: "Nom de l'entreprise",
-                      hint: 'MILLENAIRE DECOR',
+                      hint: 'Ex. Atelier Démo',
                       error: _nameErr,
                       onChanged: (_) {
                         if (_nameErr != null) setState(() => _nameErr = null);
@@ -328,7 +328,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                       key: const Key('settings_address'),
                       controller: _addressCtrl,
                       label: 'Adresse',
-                      hint: 'BP : 705 YDE',
+                      hint: 'Ex. BP 0000',
                     ),
                     const SizedBox(height: 14),
                     DatoTextField(
@@ -342,7 +342,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                       key: const Key('settings_phones'),
                       controller: _phonesCtrl,
                       label: 'Téléphone(s)',
-                      hint: '674 70 20 37 / 695 42 93 71',
+                      hint: '600 00 00 00 / 611 00 00 00',
                       keyboardType: TextInputType.phone,
                     ),
                     const SizedBox(height: 26),
@@ -461,7 +461,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                       key: const Key('settings_location'),
                       controller: _locationCtrl,
                       label: 'Localisation',
-                      hint: 'Situé à NKOLFOULOU (carrefour ENIET de SOA)',
+                      hint: 'Ex. Situé au quartier… (point de repère)',
                       maxLines: 2,
                     ),
                   ],

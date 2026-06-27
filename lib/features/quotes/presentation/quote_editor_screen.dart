@@ -94,7 +94,8 @@ class _QuoteEditorScreenState extends ConsumerState<QuoteEditorScreen> {
                             sectionIndex: i,
                             articles: articles,
                             controller: _controller,
-                            showSubtotal: quote.sections.length > 1,
+                            showSubtotal: quote.sections.length > 1 ||
+                                quote.rubriques.isNotEmpty,
                           ),
                         );
                       },

@@ -253,8 +253,9 @@ List<pw.Widget> _tableRows(Quote quote, double total) {
             flex: _ptFlex, align: pw.TextAlign.right, rightBorder: false),
       ]));
     }
-    // Sous-total de section : uniquement s'il y a au moins deux sections.
-    if (quote.sections.length > 1) {
+    // Sous-total de section : utile dès qu'il y a plusieurs sections ou des
+    // rubriques (sinon il ferait doublon avec le total général).
+    if (quote.sections.length > 1 || quote.rubriques.isNotEmpty) {
       final label = RegExp('total', caseSensitive: false).hasMatch(sec.title)
           ? sec.title.toUpperCase()
           : 'Total ${sec.title}'.toUpperCase();

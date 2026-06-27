@@ -40,8 +40,9 @@ List<Map<String, dynamic>> buildTemplateRows(Quote quote) {
         'pt': formatMoney(l.pt),
       });
     }
-    // Sous-total de section : uniquement s'il y a au moins deux sections.
-    if (quote.sections.length > 1) {
+    // Sous-total de section : utile dès qu'il y a plusieurs sections ou des
+    // rubriques (sinon il ferait doublon avec le total général).
+    if (quote.sections.length > 1 || quote.rubriques.isNotEmpty) {
       final label = RegExp('total', caseSensitive: false).hasMatch(sec.title)
           ? sec.title.toUpperCase()
           : 'Total ${sec.title}'.toUpperCase();

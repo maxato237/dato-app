@@ -66,7 +66,7 @@ void main() {
 
     final read = repo.getById(q.id);
     expect(read, isNotNull);
-    expect(read!.client, 'Lycée Bilingue de Yaoundé');
+    expect(read!.client, 'Client Démo');
     expect(read.sections.first.lines.length, 3);
     expect(read.rubriques.length, 2);
     expect(read.grandTotal, q.grandTotal);
@@ -93,7 +93,7 @@ void main() {
         articleToModel(const Article(id: 'a1', name: 'Planches', pu: 6000)),
       ]);
     });
-    expect(db.companyModels.where().findFirstSync()!.name, 'MILLENAIRE DECOR');
+    expect(db.companyModels.where().findFirstSync()!.name, 'ATELIER DÉMO');
     expect(db.articleModels.getByArticleIdSync('a1')!.pu, 6000);
   }, timeout: const Timeout(Duration(minutes: 2)));
 }

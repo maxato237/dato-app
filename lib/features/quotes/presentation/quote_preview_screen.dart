@@ -140,12 +140,23 @@ class QuotePreviewScreen extends ConsumerWidget {
 
   Widget _actionBar(BuildContext context, WidgetRef ref, Quote quote,
       Company company, VoidCallback onShare) {
+    // Réserve l'inset de la barre système Android (même logique que la
+    // bottom-nav et la barre de l'éditeur) pour que « PDF » / « Partager »
+    // soient au-dessus du menu de navigation Android.
+    final bottomInset = MediaQuery.of(context).padding.bottom;
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.surface,
         border: Border(top: BorderSide(color: AppColors.border)),
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x0F101828),
+            blurRadius: 16,
+            offset: Offset(0, -4),
+          ),
+        ],
       ),
-      padding: const EdgeInsets.fromLTRB(14, 10, 14, 14),
+      padding: EdgeInsets.fromLTRB(14, 10, 14, 14 + bottomInset),
       child: Row(
         children: [
           Expanded(

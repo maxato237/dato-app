@@ -19,4 +19,4 @@ const bool kSmsEnabled =
 
 /// Numéro WhatsApp support affiché quand [kSmsEnabled] est false.
 /// À mettre à jour avant le lancement.
-const String kSupportWhatsApp = '+237 6 74 70 20 37';
+const String kSupportWhatsApp = '+237 6 98 91 61 50';

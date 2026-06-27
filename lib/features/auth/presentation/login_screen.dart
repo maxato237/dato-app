@@ -148,7 +148,7 @@ void _showNoSmsDialog(BuildContext context) {
           onPressed: () {
             Navigator.of(context).pop();
             // TODO: ouvrir WhatsApp avec le numéro kSupportWhatsApp
-            // url_launcher → wa.me/237674702037
+            // url_launcher → wa.me/<numéro support>
           },
           child: const Text('WhatsApp : $kSupportWhatsApp'),
         ),

@@ -4,16 +4,16 @@ import 'package:dato/features/settings/domain/company.dart';
 /// Entreprise d'exemple (en-tête des documents de devis).
 Company sampleCompany() => const Company(
       id: 'demo-company',
-      name: 'MILLENAIRE DECOR',
+      name: 'ATELIER DÉMO',
       activity: 'MENUISERIE GÉNÉRALE',
-      address: 'BP : 705 YDE',
-      phones: '674 70 20 37 / 695 42 93 71',
+      address: 'BP : 0000',
+      phones: '600 00 00 00 / 611 00 00 00',
       city: 'Yaoundé',
     );
 
 /// Devis d'exemple **déterministe** (ids fixes) réutilisé par les widget tests
-/// et la golden de l'éditeur. Inspiré du devis « 40 chaises » (MILLENAIRE
-/// DECOR), simplifié pour des assertions stables.
+/// et la golden de l'éditeur. Données fictives, simplifiées pour des
+/// assertions stables.
 ///
 /// Repères de calcul à la création :
 /// - l1 Planches : Qté 1 × 6 000  = 6 000   (le test passe Qté à 60 → 360 000)
@@ -26,7 +26,7 @@ Quote sampleQuote() => const Quote(
       number: 'DV-2026-014',
       date: '2026-05-12',
       object: 'Fabrication de 40 chaises',
-      client: 'Lycée Bilingue de Yaoundé',
+      client: 'Client Démo',
       status: QuoteStatus.draft,
       companyId: 'demo-company',
       sections: [

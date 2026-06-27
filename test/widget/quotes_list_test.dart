@@ -46,9 +46,9 @@ Future<void> _pumpList(WidgetTester tester, List<Quote> quotes) async {
 
 void main() {
   final quotes = [
-    _q('1', 'Fabrication de chaises', 'Lycée Bilingue', QuoteStatus.sent),
-    _q('2', 'Fourniture de madriers', 'Coopérative', QuoteStatus.accepted),
-    _q('3', 'Placards sur mesure', 'Mme Atangana', QuoteStatus.accepted),
+    _q('1', 'Fabrication de chaises', 'Client Alpha', QuoteStatus.sent),
+    _q('2', 'Fourniture de madriers', 'Client Beta', QuoteStatus.accepted),
+    _q('3', 'Placards sur mesure', 'Client Gamma', QuoteStatus.accepted),
   ];
 
   testWidgets('affiche tous les devis au départ', (tester) async {

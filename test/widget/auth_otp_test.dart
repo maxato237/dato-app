@@ -28,7 +28,7 @@ void main() {
 
   setUp(() {
     repo = MockAuthRepository();
-    when(() => repo.pendingPhone).thenReturn('+237674702037');
+    when(() => repo.pendingPhone).thenReturn('+237600000000');
     when(() => repo.isResetFlow).thenReturn(false);
     when(() => repo.status).thenReturn(AuthStatus.unauthenticated);
     when(() => repo.authStateChanges)

@@ -27,7 +27,7 @@ void main() {
     await tester.pump(); // résout le FutureProvider
 
     expect(find.textContaining('DOIT'), findsOneWidget);
-    expect(find.textContaining('Lycée Bilingue de Yaoundé'), findsWidgets);
+    expect(find.textContaining('Client Démo'), findsWidgets);
   });
 
   testWidgets('lien révoqué/inconnu (404) → message indisponible',
