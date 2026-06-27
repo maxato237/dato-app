@@ -29,6 +29,7 @@ class _QuoteEditorScreenState extends ConsumerState<QuoteEditorScreen> {
   late final TextEditingController _objectCtrl;
   late final TextEditingController _clientCtrl;
   late final TextEditingController _dateCtrl;
+  late final TextEditingController _noteCtrl;
 
   QuoteEditorController get _controller =>
       ref.read(quoteEditorControllerProvider(widget.quoteId).notifier);
@@ -40,6 +41,7 @@ class _QuoteEditorScreenState extends ConsumerState<QuoteEditorScreen> {
     _objectCtrl = TextEditingController(text: q.object);
     _clientCtrl = TextEditingController(text: q.client);
     _dateCtrl = TextEditingController(text: _displayDate(q.date));
+    _noteCtrl = TextEditingController(text: q.note ?? '');
   }
 
   @override
@@ -47,6 +49,7 @@ class _QuoteEditorScreenState extends ConsumerState<QuoteEditorScreen> {
     _objectCtrl.dispose();
     _clientCtrl.dispose();
     _dateCtrl.dispose();
+    _noteCtrl.dispose();
     super.dispose();
   }
 
@@ -134,6 +137,10 @@ class _QuoteEditorScreenState extends ConsumerState<QuoteEditorScreen> {
                     ),
                     const SizedBox(height: 14),
                     TotalCard(total: quote.grandTotal),
+                    const SizedBox(height: 14),
+                    _kicker('Note (NB)'),
+                    const SizedBox(height: 8),
+                    _noteCard(),
                     const SizedBox(height: 14),
                     _kicker('Blocs de signature'),
                     const SizedBox(height: 8),
@@ -393,15 +400,51 @@ class _QuoteEditorScreenState extends ConsumerState<QuoteEditorScreen> {
     );
   }
 
+  // ---------------------------------------------------------------------------
+  // Note (NB) affichée sous le devis
+  // ---------------------------------------------------------------------------
+  Widget _noteCard() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(AppRadii.lg),
+      ),
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _fieldLabel('Note affichée sous le devis (optionnel)'),
+          const SizedBox(height: 6),
+          TextField(
+            key: const Key('field-note'),
+            controller: _noteCtrl,
+            onChanged: _controller.setNote,
+            textCapitalization: TextCapitalization.sentences,
+            minLines: 2,
+            maxLines: 5,
+            decoration: const InputDecoration(
+              hintText:
+                  'Ex. Devis valable 30 jours, acompte de 50% à la commande…',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _fieldLabel(String text, {Widget? trailing}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(text,
-            style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppColors.text)),
+        Flexible(
+          child: Text(text,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.text)),
+        ),
         if (trailing != null) trailing,
       ],
     );

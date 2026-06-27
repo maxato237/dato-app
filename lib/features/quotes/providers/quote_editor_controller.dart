@@ -89,6 +89,9 @@ class QuoteEditorController
   void setClient(String v) => _apply(state.quote.copyWith(client: v));
   void setDate(String v) => _apply(state.quote.copyWith(date: v));
 
+  /// Note libre (NB) affichée sous le devis. Vide ⇒ non rendue.
+  void setNote(String v) => _apply(state.quote.copyWith(note: v));
+
   // ---- Sections ----
   void addSection() {
     final section = Section(
