@@ -23,15 +23,18 @@ subprojects {
     // evaluated when afterEvaluate is added.
     afterEvaluate {
         val androidExt = extensions.findByName("android") as? com.android.build.gradle.BaseExtension
-        if (androidExt != null && androidExt.namespace == null) {
-            val manifestFile = file("src/main/AndroidManifest.xml")
-            if (manifestFile.exists()) {
-                val packageName =
-                    Regex("package=\"(.+?)\"").find(manifestFile.readText())?.groupValues?.get(1)
-                if (packageName != null) {
-                    androidExt.namespace = packageName
+        androidExt?.let { ext ->
+            if (ext.namespace == null) {
+                val manifestFile = file("src/main/AndroidManifest.xml")
+                if (manifestFile.exists()) {
+                    val packageName =
+                        Regex("package=\"(.+?)\"").find(manifestFile.readText())?.groupValues?.get(1)
+                    if (packageName != null) {
+                        ext.namespace = packageName
+                    }
                 }
             }
+            ext.compileSdkVersion(36)
         }
     }
     project.evaluationDependsOn(":app")
